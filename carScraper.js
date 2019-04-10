@@ -1,18 +1,34 @@
-const rp = require('request-promise');
-const $ = require('cheerio');
-const url = 'https://www.hasznaltauto.hu/talalatilista/PDNG2VC3N3RTADF4RMHFB6EVHJIT4FZIWA73TAWBVRUUPELEAWJGYNBOOL3VFFU3WXO7QJ6ERREA3SKRQDTRT73SHTGTRE7AWE2VNQAJA53CILHFZSG2QUO5UH3WNAQKZZAK2D46M36CE3END3OQANNYSEO46PEZRMGAIK5QSULF2KESODDLMDD4A2UOILCLUZXTVMHDBR5VXLOSJ6XYREC56P3SZX57UXE6D6MVH7FEQTYHZJLVPMF2T5FHHFSOX52GGCYWXJ7QFFDQF4HGIYIGUBGPPARDDFT3JKBO5DGQX6RZCPZQCVYPK6MNKU77BXU2MKP5VXGYZJKPNTI6MEQMFWPOFCBMXJPHSF7OEB2WTHGVP25YAP6OGYYYKKANKZBCL2RZM5PYNYCAXCUVDKMZZA4TXFAFRMMV5XD2O5C3KWIYB3KCP6E7KULHCYN73C4M5SHG6NTKKGEEL4LSIKINHHFXXKNX4ZMFDMO4JSI6ZHS4BHOR3WQFLQDGOKVYDHHY5QDX7RFUJ72N3MIDZDLRC3RCZRTZRDZRQFZBFZRLYY6HA4CTJDQLOYW5VXX2VW5DLN4SC7TEB2ZWWIRN62GY6TKCW5HYTORJ42GWBL2WQZEQT5HI7EWWCAPJ4BQPWOYZF6NQOFXJIZB5XHCN6OITZY2OE4YJU2CKEQXJVXI4MVLQK2YEUCTXVCPGZVUJEVGNNFSKNDMBZ5NIN5A472UG5GE2AHOEFBGXOH4WDTGQTXLNEN7DBHNZDBV5UVIV3IP5LQHOR2XGVDDNIHUZLIRS7ZN5AW75R47B5X7UJFZXQ';
+const axios = require('axios');
+const cheerio = require('cheerio');
 
-rp(url)
-    .then(function(html) {
-        //success!!
-        const carUrls=[]
-        for(i = 0; i < 9; i++) {
-            carUrls.push($('.cim-kontener > h3 > a', html)[i].attribs.href)
-        }
-        console.log(carUrls);
-        // console.log($('.cim-kontener > h3 > a', html))
-    })
-    .catch(function(err) {
-        //handle error
-        console.log(err)
+const url = 'https://www.autoscout24.hu'
+const queryUrl = '/lst?priceto=3000&desc=1&size=20&page=1&fc=0&cy=A&sort=age&ustate=N%2CU&atype=C';
+
+
+axios.get(`${url}${queryUrl}`)
+    .then((response) => {
+        let $ = cheerio.load(response.data)
+        let entries = {}
+        $('.cldt-summary-full-item').each((index, element) => {
+            let numberPattern = /\d+/g
+
+            let htmlId = $(element).attr('id').split('-')
+            let id = htmlId.slice(1, (htmlId.length)).join('-')
+            let model = $(element).find($('.cldt-summary-makemodel.sc-font-bold.sc-ellipsis')).text()
+            let htmlPrice = $(element).find($('.cldt-price.sc-font-xl.sc-font-bold')).text()
+            let price = Number(htmlPrice.match(numberPattern).join(''))
+            let htmlYear = $(element).find($('ul[data-item-name="vehicle-details"]')).find($('li')).slice(1, 2).text()
+            let year = Number(htmlYear.match(numberPattern)[1])
+            let link = `${url}${$(element).find($('a')).attr('href')}`
+            let car = {
+                model,
+                price,
+                year,
+                link
+            }
+
+
+            entries[id] = car
+        })
+        console.log(entries)
     })
