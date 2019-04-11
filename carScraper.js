@@ -9,9 +9,9 @@ const queryUrl = '/lst?priceto=3000&desc=1&size=20&page=1&fc=0&cy=A&sort=age&ust
 const knex = require('knex')({
     client: 'pg',
     connection: {
-      host : '127.0.0.1',
+      host : 'localhost',
       user : 'postgres',
-      password : 'postgres',
+      password : '',
       database : 'testdb'
     }
   });
@@ -21,11 +21,12 @@ const knex = require('knex')({
 //     connection: 'postgres://postgres:postgres@localhost:5432/testdb'
 //   })
 
+const car = []
 
 axios.get(`${url}${queryUrl}`)
     .then((response) => {
         let $ = cheerio.load(response.data)
-        $('.cldt-summary-full-item').each((index, element) => {
+        return $('.cldt-summary-full-item').each((index, element) => {
             let numberPattern = /\d+/g
 
             let scoutHtmlId = $(element).attr('id').split('-')
@@ -33,21 +34,30 @@ axios.get(`${url}${queryUrl}`)
             let htmlPrice = $(element).find($('.cldt-price.sc-font-xl.sc-font-bold')).text()
             let price = Number(htmlPrice.match(numberPattern).join(''))
             let link = $(element).find($('a')).attr('href').split('/')[2]
-            let car = {
+            
+            let vehicle = {
                 scoutId,
                 price,
                 link
             }
 
-            console.log(car)
-
-            knex('carlist')
-                .returning(['id'])
-                .insert({
-                    platform: 'https://autoscout24.hu',
-                    platform_id: car.scoutId,
-                    price: car.price,
-                    link: car.link
-            })
+            car.push(vehicle)
         })
     })
+
+    console.log(car)
+
+// const insertInfoIntoDb = () => {
+//     car.map(item => {
+//         // knex('carlist')
+//         //     .insert({
+//         //         platform: 'https://autoscout24.hu',
+//         //         platform_id: item.scoutId,
+//         //         price: item.price,
+//         //         link: item.link
+//         //     })
+//         console.log(item)
+//     })
+// }
+
+// console.log(insertInfoIntoDb());
