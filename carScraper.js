@@ -1,8 +1,25 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
+const pg = require('pg');
 
 const url = 'https://www.autoscout24.hu'
 const queryUrl = '/lst?priceto=3000&desc=1&size=20&page=1&fc=0&cy=A&sort=age&ustate=N%2CU&atype=C';
+
+
+const knex = require('knex')({
+    client: 'pg',
+    connection: {
+      host : '127.0.0.1',
+      user : 'postgres',
+      password : 'postgres',
+      database : 'testdb'
+    }
+  });
+
+// const knex = require('knex')({
+//     client: 'pg',
+//     connection: 'postgres://postgres:postgres@localhost:5432/testdb'
+//   })
 
 
 axios.get(`${url}${queryUrl}`)
@@ -23,5 +40,14 @@ axios.get(`${url}${queryUrl}`)
             }
 
             console.log(car)
+
+            knex('carlist')
+                .returning(['id'])
+                .insert({
+                    platform: 'https://autoscout24.hu',
+                    platform_id: car.scoutId,
+                    price: car.price,
+                    link: car.link
+            })
         })
     })
