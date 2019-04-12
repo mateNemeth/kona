@@ -28,6 +28,7 @@ const processData = async () => {
     $('.cldt-summary-full-item').each((index, element) => {
         let numberPattern = /\d+/g;
         
+        let platform = 'https://autoscout24.hu'
         let scoutHtmlId = $(element)
             .attr('id')
             .split('-');
@@ -36,12 +37,13 @@ const processData = async () => {
             .find($('.cldt-price.sc-font-xl.sc-font-bold'))
             .text();
         let price = Number(htmlPrice.match(numberPattern).join(''));
-        let link = $(element)
+        let link = `/ajanlat/${$(element)
             .find($('a'))
             .attr('href')
-            .split('/')[2];
+            .split('/')[2]}`;
         
         let vehicle = {
+            platform,
             scoutId,
             price,
             link
@@ -57,13 +59,14 @@ const saveResult = async () => {
     result.map(item => {
         knex('carlist')
             .insert({
-                platform: 'https://autoscout24.hu',
+                platform: item.platform,
                 platform_id: item.scoutId,
                 price: item.price,
                 link: item.link
             })
             .then(console.log(item));
     })
+    
 };
 
 saveResult();
