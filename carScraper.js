@@ -25,18 +25,12 @@ const returnData = async () => {
 const processData = async () => {
     let $ = cheerio.load(await returnData());
     const data = [];
-    $('.cldt-summary-full-item').each((index, element) => {
-        let numberPattern = /\d+/g;
-        
+    $('.cldt-summary-full-item').each((index, element) => {        
         let platform = 'https://autoscout24.hu'
         let scoutHtmlId = $(element)
             .attr('id')
             .split('-');
         let scoutId = scoutHtmlId.slice(1, scoutHtmlId.length).join('-');
-        let htmlPrice = $(element)
-            .find($('.cldt-price.sc-font-xl.sc-font-bold'))
-            .text();
-        let price = Number(htmlPrice.match(numberPattern).join(''));
         let link = `/ajanlat/${$(element)
             .find($('a'))
             .attr('href')
@@ -45,7 +39,6 @@ const processData = async () => {
         let vehicle = {
             platform,
             scoutId,
-            price,
             link
         };
         
@@ -56,17 +49,29 @@ const processData = async () => {
 
 const saveResult = async () => {
     const result = await processData();
-    result.map(item => {
-        knex('carlist')
-            .insert({
-                platform: item.platform,
-                platform_id: item.scoutId,
-                price: item.price,
-                link: item.link
-            })
-            .then(console.log(item));
-    })
-    
+    try {
+        result.map(item => {
+            return knex('carlist').select().where('platform_id', item.scoutId)
+                .then(rows => {
+                    if (rows.length === 0) {
+                        return knex('carlist').insert({
+                            platform: item.platform,
+                            platform_id: item.scoutId,
+                            link: item.link
+                        })
+                    } else {
+                        return;
+                    }
+                })
+        })
+    } catch (error) {
+        throw (error)
+    }
 };
 
-saveResult();
+
+const minutes = 30, the_interval = minutes * 60 * 1000;
+
+setInterval(() => {
+    saveResult()
+}, the_interval);
