@@ -1,9 +1,9 @@
 CREATE TABLE carlist (
     id BIGSERIAL NOT NULL PRIMARY KEY,
-    platform VARCHAR(20) NOT NULL,
+    platform VARCHAR(100) NOT NULL,
     platform_id TEXT NOT NULL,
     price INT NOT NULL,
-    link VARCHAR(200) NOT NULL,
+    link TEXT NOT NULL,
     date_of_scan DATE DEFAULT NOW()
 );
 
