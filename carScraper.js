@@ -51,18 +51,17 @@ const saveResult = async () => {
     const result = await processData();
     try {
         result.map(item => {
-            return knex('carlist').select().where('platform_id', item.scoutId)
-                .then(rows => {
-                    if (rows.length === 0) {
-                        return knex('carlist').insert({
-                            platform: item.platform,
-                            platform_id: item.scoutId,
-                            link: item.link
-                        })
-                    } else {
-                        return;
-                    }
-                })
+            return knex('carlist').select().where('platform_id', item.scoutId).then(rows => {
+                if (rows.length === 0) {
+                    return knex('carlist').insert({
+                        platform: item.platform,
+                        platform_id: item.scoutId,
+                        link: item.link
+                    })
+                } else {
+                    return;
+                }
+            })
         })
     } catch (error) {
         throw (error)
