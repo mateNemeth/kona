@@ -8,16 +8,18 @@ CREATE TABLE carlist (
 );
 
 CREATE TABLE carspec (
-    id BIGINT NOT NULL PRIMARY KEY,   
-    make VARCHAR(50) NOT NULL,
+    id BIGINT NOT NULL PRIMARY KEY, 
+    ccm INT NOT NULL,  
     cartype BIGINT NOT NULL,
-    fuel VARCHAR(8) NOT NULL,    
-    transmission VARCHAR(10),
+    fuel VARCHAR(8),    
+    transmission VARCHAR(20),
     price INT NOT NULL,
+    kw INT,
+    km INT,
     city VARCHAR(20)
 );
 
-CREATE TABLE cartypes (
+CREATE TABLE cartype (
     id BIGSERIAL NOT NULL PRIMARY KEY,
     make VARCHAR(50) NOT NULL,
     model VARCHAR(50) NOT NULL,
