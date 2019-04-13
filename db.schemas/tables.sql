@@ -3,7 +3,8 @@ CREATE TABLE carlist (
     platform VARCHAR(100) NOT NULL,
     platform_id TEXT NOT NULL,
     link TEXT NOT NULL,
-    date_of_scan DATE DEFAULT NOW()
+    date_of_scan DATE DEFAULT NOW(),
+    crawled BOOLEAN
 );
 
 CREATE TABLE carspec (

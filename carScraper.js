@@ -6,7 +6,7 @@ const queryUrl = '/lst?priceto=3000&desc=1&size=20&page=1&fc=0&cy=A&sort=age&ust
 
 const knex = require('knex')({
     client: 'pg',
-    connection: 'postgres://matenemeth:password@localhost:5432/testdb'
+    connection: 'postgres://matenemeth:password@localhost:5432/kona'
 });
 
 const getData = async () => {
@@ -56,7 +56,8 @@ const saveResult = async () => {
                     return knex('carlist').insert({
                         platform: item.platform,
                         platform_id: item.scoutId,
-                        link: item.link
+                        link: item.link,
+                        crawled: false
                     })
                 } else {
                     return;
