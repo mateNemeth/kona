@@ -69,7 +69,7 @@ const queryUrl = async (url) => {
     try {
         return await axios.get(url)
     } catch (error) {
-        console.log(error, `at querUrl, with url: ${url}`)
+        console.log(error.response.status)
     }
 }
 
