@@ -1,13 +1,9 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
+const db = require('./db');
 
 const url = 'https://www.autoscout24.hu';
 const queryUrl = '/lst?priceto=3000&desc=1&size=20&page=1&fc=0&cy=A&sort=age&ustate=N%2CU&atype=C';
-
-const knex = require('knex')({
-    client: 'pg',
-    connection: 'postgres://matenemeth:password@localhost:5432/kona'
-});
 
 const getData = async () => {
     try {
@@ -47,13 +43,13 @@ const processData = async () => {
     return data;
 };
 
-const saveResult = async () => {
+const scrapeNew = async () => {
     const result = await processData();
     try {
         result.map(item => {
-            return knex('carlist').select().where('platform_id', item.scoutId).then(rows => {
+            return db('carlist').select().where('platform_id', item.scoutId).then(rows => {
                 if (rows.length === 0) {
-                    return knex('carlist').insert({
+                    return db('carlist').insert({
                         platform: item.platform,
                         platform_id: item.scoutId,
                         link: item.link,
@@ -65,13 +61,11 @@ const saveResult = async () => {
             })
         })
     } catch (error) {
-        throw (error)
+        throw new Error (error)
     }
 };
 
+module.exports = {
+    scrapeNew: scrapeNew
+}
 
-const minutes = 30, the_interval = minutes * 60 * 1000;
-
-setInterval(() => {
-    saveResult()
-}, the_interval);
