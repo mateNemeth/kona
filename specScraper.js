@@ -23,8 +23,8 @@ const scrapeSingle = async () => {
     try {
         if (data) {
             const id = data.id
-            const carDetails = await queryUrl(`${data.platform}${data.url}`).then(resp => {
-               carProcess(resp.data, id)
+            const carDetails = await queryUrl(`${data.platform}${data.url}`).then(async (resp) => {
+               return await carProcess(resp.data, id)
             })
             return carDetails 
         } else {
@@ -169,7 +169,6 @@ const saveTypeIntoDb = async (type) => {
 
 
 const makeItFireInInterval = async (delay) => {
-
     const intoDb = await saveIntoTable()
     setTimeout(() => {
         const newTiming = () => (Math.floor(Math.random() * 180000) + 30000)
