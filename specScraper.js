@@ -37,57 +37,27 @@ const scrapeSingle = async () => {
 
 const carProcess = async (data, id) => {
     const html = await data
-    const numberPattern = /\d+/g; 
+    const numberPattern = /\d+/g;
+    const lookFor = (element, keyword) => {
+        return $(element).filter(function() {
+            return (
+                $(this).text().trim() === keyword
+            )
+        })
+    }
                 
     let $ = cheerio.load(html)
 
-    let make = $('.cldt-categorized-data.cldt-data-section.sc-pull-right a')
-        .eq(0)
-        .text()
-    let model = $('.cldt-categorized-data.cldt-data-section.sc-pull-right a')
-        .eq(1)
-        .text()
-    let age = Number($(".sc-font-l.cldt-stage-primary-keyfact")
-        .eq(4)
-        .text()
-        .match(numberPattern)[1]);
-    let km = Number($(".sc-font-l.cldt-stage-primary-keyfact")
-        .eq(3)
-        .text()
-        .match(numberPattern)
-        .join(""));
-    let kw = Number($(".sc-font-l.cldt-stage-primary-keyfact")
-        .eq(5)
-        .text()
-        .match(numberPattern));
-    let fuel = $(".cldt-data-section.sc-grid-col-s-12")
-        .find("dd")
-        .eq(0)
-        .text()
-        .replace(/\s/g, "");
-    let transmission = $(".cldt-categorized-data.cldt-data-section.sc-pull-left")
-        .eq(1)
-        .find("dd")
-        .eq(0)
-        .text()
-        .replace(/\s/g, "");
-    let ccm = Number($(".cldt-categorized-data.cldt-data-section.sc-pull-left")
-        .eq(1)
-        .find("dd")
-        .eq(2)
-        .text()
-        .match(numberPattern)
-        .join(""));
-    let price = Number($(".cldt-price")
-        .eq(1)
-        .find("h2")
-        .text()
-        .match(numberPattern)
-        .join(""));
-    let city = $('.cldt-stage-vendor-text.sc-font-s')
-        .find('span.sc-font-bold')
-        .eq(0)
-        .text()
+    let make = $("dt:contains('Márka')").next().text().trim();
+    let model = $("dt:contains('Modell')").next().text().trim();
+    let age = Number($(".sc-font-l.cldt-stage-primary-keyfact").eq(4).text().match(numberPattern)[1]);
+    let km = Number($(".sc-font-l.cldt-stage-primary-keyfact").eq(3).text().match(numberPattern).join(""));
+    let kw = Number($(".sc-font-l.cldt-stage-primary-keyfact").eq(5).text().match(numberPattern));
+    let fuel = lookFor($("dt"), "Üzemanyag").next().text().trim();
+    let transmission = lookFor($("dt"), "Váltó típusa").next().text().trim();
+    let ccm = Number($('dd:contains("cm³")').text().match(numberPattern).join(""));
+    let price = Number($(".cldt-price").eq(1).find("h2").text().match(numberPattern).join(""));
+    let city = $('.cldt-stage-vendor-text.sc-font-s').find('span.sc-font-bold').eq(0).text()
     const vehicle = [
         { make, model, age },
         { id, km, kw, fuel, transmission, ccm, price, city }
