@@ -78,7 +78,7 @@ const carProcess = async (data, id) => {
 				};
 				
 				let ccm = () => {
-					if (lookFor($("dt", "Hengerűrtartalom")).length > 0) {
+					if (lookFor($("dt"), "Hengerűrtartalom").length > 0) {
 						return Number(lookFor($("dt"), "Hengerűrtartalom").next().text().match(numberPattern).join(""));
 						} else {
 							return null;
