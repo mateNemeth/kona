@@ -23,7 +23,7 @@ const scrapeSingle = async () => {
     try {
         if (data) {
             const id = data.id
-            const carDetails = await queryUrl(`${data.platform}${data.url}`).then(async (resp) => {
+            const carDetails = await queryUrl(`${data.platform}${data.url}`, id).then(async (resp) => {
                return await carProcess(resp.data, id)
             })
             return carDetails 
@@ -65,12 +65,23 @@ const carProcess = async (data, id) => {
     return vehicle
 }
 
-const queryUrl = async (url) => {
+const queryUrl = async (url, id) => {
     try {
         return await axios.get(url)
     } catch (error) {
         console.log(error.response.status)
+        if (error.response.status === 410) {
+            return await ifEntryDoesntExist(id).then(response => {
+                if(response) {
+                    makeItFireInInterval(0)
+                }
+            })
+        }
     }
+}
+
+const ifEntryDoesntExist = async (id) => {
+    return await db('carlist').where('id', id).del()
 }
 
 const saveIntoTable = async () => {
