@@ -51,16 +51,65 @@ const carProcess = async (data, id) => {
     let make = $("dt:contains('Márka')").next().text().trim();
     let model = $("dt:contains('Modell')").next().text().trim();
     let age = Number($(".sc-font-l.cldt-stage-primary-keyfact").eq(4).text().match(numberPattern)[1]);
-    let km = Number($(".sc-font-l.cldt-stage-primary-keyfact").eq(3).text().match(numberPattern).join(""));
-    let kw = Number($(".sc-font-l.cldt-stage-primary-keyfact").eq(5).text().match(numberPattern));
-    let fuel = lookFor($("dt"), "Üzemanyag").next().text().trim();
-    let transmission = lookFor($("dt"), "Váltó típusa").next().text().trim();
-    let ccm = Number($('dd:contains("cm³")').text().match(numberPattern).join(""));
+    let km = Number($(".sc-font-l.cldt-stage-primary-keyfact").eq(3).text().match(numberPattern).join("")) || 0;
+    let kw = Number($(".sc-font-l.cldt-stage-primary-keyfact").eq(5).text().match(numberPattern)) || 0;
+    let fuel = () => {
+        if (lookFor($("dt"), "Üzemanyag")) {
+          if (
+            lookFor($("dt"), "Üzemanyag")
+              .next()
+              .text()
+              .trim() === "Dízel (Particulate Filter)"
+          ) {
+            return "Dízel";
+          } else {
+            return lookFor($("dt"), "Üzemanyag")
+              .next()
+              .text()
+              .trim();
+          }
+        } else {
+          return null;
+        }
+      };
+    
+      let transmission = () => {
+        if (lookFor($("dt"), "Váltó típusa")) {
+          if (
+            lookFor($("dt"), "Váltó típusa")
+              .next()
+              .text()
+              .trim() === "Sebességváltó"
+          ) {
+            return "Manuális";
+          } else {
+            return lookFor($("dt"), "Váltó típusa")
+              .next()
+              .text()
+              .trim();
+          }
+        } else {
+          return null;
+        }
+      };
+    
+      let ccm = () => {
+        if ($('dd:contains("cm³")')) {
+          return Number(
+            $('dd:contains("cm3")')
+              .text()
+              .match()
+              .join("")
+          );
+        } else {
+          return null;
+        }
+      };
     let price = Number($(".cldt-price").eq(1).find("h2").text().match(numberPattern).join(""));
     let city = $('.cldt-stage-vendor-text.sc-font-s').find('span.sc-font-bold').eq(0).text()
     const vehicle = [
         { make, model, age },
-        { id, km, kw, fuel, transmission, ccm, price, city }
+        { id, km, kw, fuel: fuel(), transmission: transmission(), ccm: ccm(), price, city }
     ]
     return vehicle
 }
@@ -69,7 +118,8 @@ const queryUrl = async (url, id) => {
     try {
         return await axios.get(url)
     } catch (error) {
-        console.log(error.response.status)
+        // if a car is no longer listed the response status code is 410
+        // i figured there's no need to keep it's link in the db anymore, so i delete it in ifEntryDoesntExist(), then restarting the script
         if (error.response.status === 410) {
             return await ifEntryDoesntExist(id).then(response => {
                 if(response) {
