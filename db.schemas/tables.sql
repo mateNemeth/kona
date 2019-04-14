@@ -11,7 +11,7 @@ CREATE TABLE carspec (
     id BIGINT NOT NULL PRIMARY KEY, 
     ccm INT NOT NULL,  
     cartype BIGINT NOT NULL,
-    fuel VARCHAR(8),    
+    fuel VARCHAR(20),    
     transmission VARCHAR(20),
     price INT NOT NULL,
     kw INT,
