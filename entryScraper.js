@@ -65,7 +65,10 @@ const scrapeNew = async () => {
     }
 };
 
-module.exports = {
-    scrapeNew: scrapeNew
-}
+const minutes = 30, the_interval = minutes * 60 * 1000;
+
+setInterval(() => {
+    saveResult()
+}, the_interval);
+
 
