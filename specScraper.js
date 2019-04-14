@@ -111,6 +111,7 @@ const carProcess = async (data, id) => {
         { make, model, age },
         { id, km, kw, fuel: fuel(), transmission: transmission(), ccm: ccm(), price, city }
     ]
+    console.log(vehicle)
     return vehicle
 }
 
