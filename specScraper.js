@@ -13,7 +13,7 @@ const findToScrape = async () => {
 			}
 			return entry
 		} else {
-			return 
+			return makeItFireInInterval(900000);
 		}       
 	})
 }
