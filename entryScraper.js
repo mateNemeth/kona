@@ -65,7 +65,7 @@ const scrapeNew = async () => {
     }
 };
 
-const minutes = 30, the_interval = minutes * 60 * 1000;
+const minutes = 15, the_interval = minutes * 60 * 1000;
 
 setInterval(() => {
     scrapeNew()
