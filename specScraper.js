@@ -13,7 +13,7 @@ const findToScrape = async () => {
 			}
 			return entry
 		} else {
-			return makeItFireInInterval(900000);
+			return 
 		}       
 	})
 }
@@ -28,7 +28,7 @@ const scrapeSingle = async () => {
 			})
 			return carDetails 
 		} else {
-			console.log('no entries')
+			return
 		}
 	} catch (error) {
 		console.log(error, 'at scrapeSingle')
@@ -116,9 +116,9 @@ const ifEntryDoesntExist = async (id) => {
 	
 const saveIntoTable = async () => {
 	const result = await scrapeSingle().then(resp => {
-		const spec = resp[1]
-		const type = resp[0]
 		if (resp) {
+			const spec = resp[1]
+			const type = resp[0]
 			return saveTypeIntoDb(type).then(resp => {
 				let typeId = resp
 				console.log(typeId)
@@ -180,10 +180,17 @@ const saveTypeIntoDb = async (type) => {
 
 const makeItFireInInterval = async (delay) => {
 	const intoDb = await saveIntoTable()
-	setTimeout(() => {
-		const newTiming = () => (Math.floor(Math.random() * 180000) + 30000)
-		return makeItFireInInterval(newTiming())
-	}, delay)
+	if (intoDb) {
+		setTimeout(() => {
+			const newTiming = () => (Math.floor(Math.random() * 180000) + 30000)
+			return makeItFireInInterval(newTiming())
+		}, delay)
+	} else {
+		setTimeout(() => {
+			return makeItFireInInterval(90000)
+		}, delay)
+	}
+	
 	return intoDb;
 }
 	
