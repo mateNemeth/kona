@@ -42,9 +42,9 @@ const carProcess = async (data, id) => {
 		return $(element).filter(function() {
 			return (
 				$(this).text().trim() === keyword
-				)
-			})
-		}
+			)
+		})
+	}
 		
 	let $ = cheerio.load(html)
 		
@@ -187,7 +187,7 @@ const makeItFireInInterval = async (delay) => {
 		}, delay)
 	} else {
 		setTimeout(() => {
-			return makeItFireInInterval(90000)
+			return makeItFireInInterval(600000)
 		}, delay)
 	}
 	
