@@ -1,5 +1,6 @@
 const axios = require('axios')
 const cheerio = require('cheerio')
+const calculateAll = require('./calculateAvg')
 const db = require('./db')
 
 
@@ -90,7 +91,6 @@ const carProcess = async (data, id) => {
 		{ make, model, age },
 		{ id, km, kw, fuel: fuel(), transmission: transmission(), ccm: ccm(), price, city }
 	]
-	console.log(vehicle)
 	return vehicle
 }
 	
@@ -121,8 +121,9 @@ const saveIntoTable = async () => {
 			const type = resp[0]
 			return saveTypeIntoDb(type).then(resp => {
 				let typeId = resp
-				console.log(typeId)
-				saveSpecIntoDb(spec, typeId)				})
+				calculateAll(typeId)
+				saveSpecIntoDb(spec, typeId)
+			})
 		} else {
 			return
 		}
@@ -171,7 +172,6 @@ const saveTypeIntoDb = async (type) => {
 					return resp[0]
 				})
 			} else {
-				console.log(rows[0].id)
 				return rows[0].id
 			}
 	})
