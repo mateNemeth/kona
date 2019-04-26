@@ -15,22 +15,22 @@ const calculateAverage = async (typeId) => {
     })
 }
 
-// const calculateMedian = async (typeId) => {
-//     return await getPricesFromDb(typeId).then(prices => {
-//         const sorted = prices.slice().sort()
-//         const middle = Math.floor(sorted.length / 2)
+const calculateMedian = async (typeId) => {
+    return await getPricesFromDb(typeId).then(prices => {
+        const sorted = prices.slice().sort()
+        const middle = Math.floor(sorted.length / 2)
 
-//         if(sorted.length % 2 === 0) {
-//             return (sorted[middle - 1] + sorted[middle]) / 2
-//         }
-//         return sorted[middle]
-//     })
-// }
+        if(sorted.length % 2 === 0) {
+            return (sorted[middle - 1] + sorted[middle]) / 2
+        }
+        return sorted[middle]
+    })
+}
 
 const checkIfItsCheaper = async (typeId, newPrice) => {    
-    // const median = await calculateMedian(typeId)
-    // const alertMedianTreshold = median * 0.65    
-    // console.log(`median is ${median}, alerting at ${alertMedianTreshold}`)
+    const median = await calculateMedian(typeId)
+    const alertMedianTreshold = median * 0.65    
+    console.log(`median is ${median}, alerting at ${alertMedianTreshold}`)
 
     const average = await calculateAverage(typeId)
     const alertAvgTreshold = average * 0.65
@@ -42,6 +42,6 @@ const checkIfItsCheaper = async (typeId, newPrice) => {
     return false
 }
 
-checkIfItsCheaper(88, 1700)
+// checkIfItsCheaper(258, 1700)
 
 module.exports = checkIfItsCheaper
