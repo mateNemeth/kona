@@ -91,7 +91,6 @@ const carProcess = async (data, id) => {
 		{ make, model, age },
 		{ id, km, kw, fuel: fuel(), transmission: transmission(), ccm: ccm(), price, city }
 	]
-	console.log(vehicle)
 	return vehicle
 }
 	
@@ -120,11 +119,15 @@ const saveIntoTable = async () => {
 		if (resp) {
 			const spec = resp[1]
 			const type = resp[0]
-			return saveTypeIntoDb(type).then(resp => {
+			return saveTypeIntoDb(type).then(async resp => {
 				let typeId = resp
-				if(checkIfItsCheaper(typeId, spec.price)){
-					console.log('cheaper')
-				}
+				console.log(spec.price)
+				console.log(typeId)
+				let isCheaper = await checkIfItsCheaper(typeId, spec.price)
+				console.log(isCheaper)
+				// if(checkIfItsCheaper(typeId, spec.price)){
+				// 	console.log('cheaper')
+				// }
 				saveSpecIntoDb(spec, typeId)
 			})
 		} else {
