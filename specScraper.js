@@ -58,6 +58,8 @@ const carProcess = async (data, id) => {
 		if (lookFor($("dt"), "Üzemanyag").length > 0) {
 			if (lookFor($("dt"), "Üzemanyag").next().text().trim() === "Dízel (Particulate Filter)") {
 				return "Dízel";
+			} else if (lookFor($("dt"), "Üzemanyag").next().text().trim() === "Benzin (Particulate Filter)" || "Super 95" || "91-es normálbenzin") {
+				return "Benzin";
 			} else {
 				return lookFor($("dt"), "Üzemanyag").next().text().trim();
 			}
