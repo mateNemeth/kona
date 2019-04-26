@@ -34,11 +34,14 @@ const checkIfItsCheaper = async (typeId, newPrice) => {
 
     const average = await calculateAverage(typeId)
     const alertAvgTreshold = average * 0.65
+    console.log(`avg is ${average}, alerting at ${alertAvgTreshold}`)
+
     if (newPrice < alertAvgTreshold) {
         return true
     }
     return false
 }
 
+checkIfItsCheaper(88, 1700)
 
 module.exports = checkIfItsCheaper
