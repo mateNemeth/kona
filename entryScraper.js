@@ -3,7 +3,7 @@ const cheerio = require('cheerio');
 const db = require('./db');
 
 const url = 'https://www.autoscout24.hu';
-const queryUrl = '/lst?priceto=3000&desc=1&size=20&page=1&fc=0&cy=A&sort=age&ustate=N%2CU&atype=C';
+const queryUrl = '/lst?priceto=5000&desc=1&size=20&page=1&fc=0&cy=A&sort=age&ustate=N%2CU&atype=C';
 
 const getData = async () => {
     try {

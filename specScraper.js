@@ -59,6 +59,10 @@ const carProcess = async (data, id) => {
 		if (lookFor($("dt"), "Üzemanyag").length > 0) {
 			if (lookFor($("dt"), "Üzemanyag").next().text().trim() === "Dízel (Particulate Filter)") {
 				return "Dízel";
+			} else if (lookFor($("dt"), "Üzemanyag").next().text().trim() === "Benzin (Particulate Filter)" || 
+					   lookFor($("dt"), "Üzemanyag").next().text().trim() === "Super 95" || 
+					   lookFor($("dt"), "Üzemanyag").next().text().trim() === "91-es normálbenzin") {
+				return "Benzin";
 			} else {
 				return lookFor($("dt"), "Üzemanyag").next().text().trim();
 			}
@@ -122,10 +126,9 @@ const saveIntoTable = async () => {
 			const type = resp[0]
 			return saveTypeIntoDb(type).then(resp => {
 				let typeId = resp
-				saveSpecIntoDb(spec, typeId)
-				checkIfCheap(spec.id, typeId, spec.price)
 				calculateAll(typeId)
-				
+				checkIfCheap(spec.id, typeId, spec.price)
+				saveSpecIntoDb(spec, typeId)
 			})
 		} else {
 			return
