@@ -2,7 +2,7 @@ const db = require('./db')
 
 const getPricesFromDb = async (typeId) => {
     return await db('carspec').select().where('cartype', typeId).then(rows => {
-        if(rows.length > 5) {
+        if(rows.length >= 5) {
             const priceCount = rows.map(item => {
                 return Number(item.price)
             })
