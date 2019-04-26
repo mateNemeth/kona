@@ -2,7 +2,6 @@ const db = require('./db')
 
 const checkIfCheap = async (id, type, price) => {
     const vehiclePriceStats = await db('average_prices').select().where('id', type).then(row => row[0])
-    console.log(vehiclePriceStats)
     if(!vehiclePriceStats) {
         return
     } else {
