@@ -1,5 +1,6 @@
 const axios = require('axios')
 const cheerio = require('cheerio')
+const checkIfItsCheaper = require('./calculateAvg')
 const db = require('./db')
 
 
@@ -121,8 +122,11 @@ const saveIntoTable = async () => {
 			const type = resp[0]
 			return saveTypeIntoDb(type).then(resp => {
 				let typeId = resp
-				console.log(typeId)
-				saveSpecIntoDb(spec, typeId)				})
+				if(checkIfItsCheaper(typeId, spec.price)){
+					console.log('cheaper')
+				}
+				saveSpecIntoDb(spec, typeId)
+			})
 		} else {
 			return
 		}
@@ -171,7 +175,6 @@ const saveTypeIntoDb = async (type) => {
 					return resp[0]
 				})
 			} else {
-				console.log(rows[0].id)
 				return rows[0].id
 			}
 	})
