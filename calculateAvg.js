@@ -2,9 +2,9 @@ const db = require('./db')
 
 const getPricesFromDb = async (typeId) => {
     return await db('carspec').select().where('cartype', typeId).then(rows => {
-        if(rows.length > 0) {
+        if(rows.length > 5) {
             const priceCount = rows.map(item => {
-                return item.price
+                return Number(item.price)
             })
             return priceCount
         } else {
@@ -16,7 +16,7 @@ const getPricesFromDb = async (typeId) => {
 const calculateAverage = async (typeId) => {
     return await getPricesFromDb(typeId).then(prices => {
         if(prices) {
-            return prices.reduce((prev, curr) => prev + curr) / prices.length
+            return Math.round(prices.reduce((prev, curr) => prev + curr) / prices.length)
         } else {
             return
         }
@@ -26,34 +26,43 @@ const calculateAverage = async (typeId) => {
 const calculateMedian = async (typeId) => {
     return await getPricesFromDb(typeId).then(prices => {
         if(prices) {
-            const sorted = prices.slice().sort()
+            const sorted = prices.slice().sort((a, b) => a- b)
             const middle = Math.floor(sorted.length / 2)
 
             if(sorted.length % 2 === 0) {
-                return (sorted[middle - 1] + sorted[middle]) / 2
+                return Math.round((sorted[middle - 1] + sorted[middle]) / 2)
             }
-            return sorted[middle]
+            return Math.round(sorted[middle])
         } else {
             return
         }        
     })
 }
 
-const checkIfItsCheaper = async (typeId, newPrice) => {    
+const calculateAll = async (typeId) => {    
     const median = await calculateMedian(typeId)
     const average = await calculateAverage(typeId)
     if (median && average) {
-        const alertMedianTreshold = median * 0.65
-        const alertAvgTreshold = average * 0.65
-        console.log(`median is ${median}, alerting at ${alertMedianTreshold}`)
-        console.log(`avg is ${average}, alerting at ${alertAvgTreshold}`)
-        if (newPrice < alertAvgTreshold) {
-            return true
-        }
+        // const alertMedianTreshold = median * 0.65
+        // const alertAvgTreshold = average * 0.65
+        db('average_prices').select().where('id', typeId).then(rows => {
+            if(rows.length === 0) {
+                return db('average_prices').insert({
+                    id: typeId,
+                    avg: average,
+                    median: median
+                })
+            } else {
+                return db('average_prices').where('id', rows[0].id).update({
+                    id: typeId,
+                    avg: average,
+                    median: median
+                })
+            }
+        })
+    } else {
+        return false
     }
-    return false
 }
 
-// checkIfItsCheaper(258, 1700)
-
-module.exports = checkIfItsCheaper
+module.exports = calculateAll

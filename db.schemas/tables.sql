@@ -26,7 +26,7 @@ CREATE TABLE cartype (
     age INT NOT NULL
 );
 
-CREATE TABLE averagePrices (
+CREATE TABLE average_prices (
     id BIGINT NOT NULL PRIMARY KEY,
     avg BIGINT NOT NULL,
     median BIGINT NOT NULL
