@@ -193,4 +193,4 @@ const makeItFireInInterval = async (delay) => {
 	return intoDb;
 }
 	
-makeItFireInInterval(0);
+makeItFireInInterval(30000);
