@@ -15,8 +15,8 @@ const checkIfCheap = async (id, type, price) => {
         if(price < avg * 0.75 || price < median * 0.75) {
             const link = await db('carlist').select().where('id', id).then(row => `${row[0].platform}${row[0].link}`)
             const typeText = await db('cartype').select().where('id', type).then(row => `${row[0].make} ${row[0].model} (${row[0].age})`)
-            const avgPercent = Math.round(price/avg * 100)
-            const medianPercent = Math.round(price/median * 100)
+            const avgPercent = Math.round(100-(price/avg * 100))
+            const medianPercent = Math.round(100-(price/median * 100))
             console.log('found a cheap car, mailing it!')
             return await mailIt(typeText, price, link, avgPercent, medianPercent)
         }
