@@ -124,6 +124,4 @@ const mailIt = (typeText, price, link, avgPercent, medianPercent) => {
   });
 }
 
-testMail('Volkswagen Golf - (2001)', '1200', 'https://autoscout24.hu', '70', '68')
-
 module.exports = mailIt
