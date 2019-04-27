@@ -17,6 +17,7 @@ const checkIfCheap = async (id, type, price) => {
             const typeText = await db('cartype').select().where('id', type).then(row => `${row[0].make} ${row[0].model} (${row[0].age})`)
             const avgPercent = Math.round(price/avg * 100)
             const medianPercent = Math.round(price/median * 100)
+            console.log('found a cheap car, mailing it!')
             return await mailIt(typeText, price, link, avgPercent, medianPercent)
         }
     }
