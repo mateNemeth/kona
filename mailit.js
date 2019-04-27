@@ -3,6 +3,7 @@ const DOMAIN = 'mail.matenemeth.hu';
 const HOST = 'api.eu.mailgun.net'
 const mailgun = require('mailgun-js')({apiKey: API_KEY, domain: DOMAIN, host: HOST});
 
+
 const mailIt = async (typeText, price, link, avgPercent, medianPercent) => {
   const data = {
     from: 'Car Alert <no-reply@mail.matenemeth.hu>',
