@@ -23,6 +23,7 @@ const checkIfCheap = async (id, type, price) => {
     }
 }
 
+//postal codes for Vajk: 10xx, 11xx, 12xx, 22xx, 24xx, 71xx
 
 
 
