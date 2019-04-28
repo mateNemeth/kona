@@ -127,7 +127,7 @@ const saveIntoTable = async () => {
 			return saveTypeIntoDb(type).then(resp => {
 				let typeId = resp
 				calculateAll(typeId)
-				checkIfCheap(spec.id, typeId, spec.price)
+				// checkIfCheap(spec.id, typeId, spec.price)
 				saveSpecIntoDb(spec, typeId)
 			})
 		} else {
