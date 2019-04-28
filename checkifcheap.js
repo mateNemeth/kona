@@ -18,7 +18,7 @@ const checkIfCheap = async (id, type, price) => {
             const avgPercent = Math.round(100-(price/avg * 100))
             const medianPercent = Math.round(100-(price/median * 100))
             console.log('found a cheap car, mailing it!')
-            return await mailIt(typeText, price, link, avgPercent, medianPercent)
+            return await mailIt(typeText, price, link, avgPercent, medianPercent, zipcode)
         }
     }
 }

@@ -92,9 +92,11 @@ const carProcess = async (data, id) => {
 	};
 	let price = Number($(".cldt-price").eq(1).find("h2").text().match(numberPattern).join(""));
 	let city = $('.cldt-stage-vendor-text.sc-font-s').find('span.sc-font-bold').eq(0).text()
+	let zipcode = Number($("div[data-item-name='vendor-contact-city']").eq(0).text().match(numberPattern))
+
 	const vehicle = [
 		{ make, model, age },
-		{ id, km, kw, fuel: fuel(), transmission: transmission(), ccm: ccm(), price, city }
+		{ id, km, kw, fuel: fuel(), transmission: transmission(), ccm: ccm(), price, city, zipcode }
 	]
 	return vehicle
 }
@@ -151,6 +153,7 @@ const saveSpecIntoDb = async (spec, typeId) => {
 					ccm: spec.ccm,
 					price: spec.price,
 					city: spec.city,
+					zipcode: spec.zipcode,
 					cartype: typeId
 				}).then(resp => {
 					return db('carlist').where('id', resp[0]).update('crawled', true)
