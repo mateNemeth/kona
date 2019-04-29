@@ -16,7 +16,8 @@ CREATE TABLE carspec (
     price INT NOT NULL,
     kw INT,
     km INT,
-    city VARCHAR(20)
+    city VARCHAR(20),
+    zipcode INT
 );
 
 CREATE TABLE cartype (
