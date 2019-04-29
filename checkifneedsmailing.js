@@ -57,6 +57,7 @@ const filterByPriceTreshold = async (carSpec, typeId, filteredUsers) => {
                     const treshold = (100 - user.alerts.treshold) / 100
                     const { price } = carSpec
                     const { avg, median} = vehiclePriceStats
+                    console.log('treshold: ' + treshold, 'price: ' + price, 'alert at avg: ' + avg * treshold, 'alert at median: ' + median * treshold)
                     if(price < (avg * treshold) || price < (median * treshold)) {
                         return user
                     }
