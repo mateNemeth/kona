@@ -29,8 +29,8 @@ const filterUsers = async (carSpec, typeId) => {
             }
         }
     ]
-    const usersToCheck = await filterByZip(carSpec.zipcode, users)
-    return await filterByPriceTreshold(carSpec, typeId, usersToCheck)
+    
+    return await filterByPriceTreshold(carSpec, typeId, await filterByZip(carSpec.zipcode, users))
 }
 
 const filterByZip = (zipcode, filteredUsers) => {
@@ -52,7 +52,7 @@ const filterByPriceTreshold = async (carSpec, typeId, filteredUsers) => {
             }
         })
         if(vehiclePriceStats) {
-            console.log('got to final')
+            console.log('got to final with: ', filteredUsers)
             const toAlert = filteredUsers.map(user => {
                 const treshold = (100 - user.alerts.treshold) / 100
                 const { price } = carSpec
