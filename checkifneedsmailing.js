@@ -19,15 +19,15 @@ const checkIfNeedsMailing = async (carSpec, typeId) => {
 const filterUsers = async (carSpec, typeId) => {
     //hardcoded for now, need to create new usertable
     const users = [
-        {
-            id: 1,
-            name: 'Kiskos Vajk',
-            email: 'kiskosvajk@gmail.com',
-            alerts: {
-                zipcodes: [10, 11, 12, 22, 24, 71],
-                treshold: 25
-            }
-        },
+        // {
+        //     id: 1,
+        //     name: 'Kiskos Vajk',
+        //     email: 'kiskosvajk@gmail.com',
+        //     alerts: {
+        //         zipcodes: [10, 11, 12, 22, 24, 71],
+        //         treshold: 25
+        //     }
+        // },
         {
             id: 2,
             name: 'Nemeth Mate',
