@@ -48,7 +48,7 @@ const filterByPriceTreshold = async (carSpec, typeId, filteredUsers) => {
             if(row) {
                 return row[0]
             } else {
-                return
+                return null
             }
         })
         if(vehiclePriceStats) {
@@ -61,6 +61,7 @@ const filterByPriceTreshold = async (carSpec, typeId, filteredUsers) => {
                 if(price < (avg * treshold) || price < (median * treshold)) {
                     return user
                 } else {
+                    console.log('no avg price for this vehicle')
                     return null
                 }
             })
