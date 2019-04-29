@@ -42,7 +42,7 @@ const filterByZip = (zipcode, filteredUsers) => {
 
 const filterByPriceTreshold = async (carSpec, typeId, filteredUsers) => {
     if (!filteredUsers) {
-        return
+        return null
     } else {
         const vehiclePriceStats = await db('average_prices').select().where('id', typeId).then(row => {
             if(row) {
@@ -52,20 +52,20 @@ const filterByPriceTreshold = async (carSpec, typeId, filteredUsers) => {
             }
         })
         if(vehiclePriceStats) {
-            try {
-                return filteredUsers.map(user => {
-                    const treshold = (100 - user.alerts.treshold) / 100
-                    const { price } = carSpec
-                    const { avg, median} = vehiclePriceStats
-                    console.log('treshold: ' + treshold, 'price: ' + price, 'alert at avg: ' + avg * treshold, 'alert at median: ' + median * treshold)
-                    if(price < (avg * treshold) || price < (median * treshold)) {
-                        return user
-                    }
-                })
-            } catch (error) {
-                    console.log(error)
-            }             
-        }
+            console.log('got to final')
+            const toAlert = filteredUsers.map(user => {
+                const treshold = (100 - user.alerts.treshold) / 100
+                const { price } = carSpec
+                const { avg, median} = vehiclePriceStats
+                console.log('treshold: ' + treshold, 'price: ' + price, 'alert at avg: ' + avg * treshold, 'alert at median: ' + median * treshold)
+                if(price < (avg * treshold) || price < (median * treshold)) {
+                    return user
+                } else {
+                    return null
+                }
+            })
+            return toAlert
+        } 
     }
 }
 
