@@ -4,10 +4,10 @@ const HOST = 'api.eu.mailgun.net'
 const mailgun = require('mailgun-js')({apiKey: API_KEY, domain: DOMAIN, host: HOST});
 
 
-const mailIt = (typeText, price, link, avgPercent, medianPercent) => {
+const mailIt = (typeText, price, link, avgPercent, medianPercent, user) => {
   const data = {
     from: 'Car Alert <no-reply@mail.matenemeth.hu>',
-    to: 'mate.nemeth@outlook.hu, kiskosvajk@gmail.com',
+    to: `${user.email}`,
     subject: `${typeText} - €${price},-`,
     text: `A medián eladási ár ${medianPercent}%-a, az átlagár ${avgPercent}%-a.
     A hírdetés itt található: ${link}`,
