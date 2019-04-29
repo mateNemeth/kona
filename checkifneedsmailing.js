@@ -4,7 +4,7 @@ const mailIt = require('./mailit')
 
 const checkIfNeedsMailing = async (carSpec, typeId) => {  
     const usersToAlert = await filterUsers(carSpec, typeId)
-    if(usersToAlert) {
+    if(await usersToAlert) {
         const link = await db('carlist').select().where('id', carSpec.id).then(row => `${row[0].platform}${row[0].link}`)
         const typeText = await db('cartype').select().where('id', typeId).then(row => `${row[0].make} ${row[0].model} (${row[0].age})`)
         const avgPercent = Math.round(100-(price/avg * 100))
@@ -19,15 +19,15 @@ const checkIfNeedsMailing = async (carSpec, typeId) => {
 const filterUsers = async (carSpec, typeId) => {
     //hardcoded for now, need to create new usertable
     const users = [
-        // {
-        //     id: 1,
-        //     name: 'Kiskos Vajk',
-        //     email: 'kiskosvajk@gmail.com',
-        //     alerts: {
-        //         zipcodes: [10, 11, 12, 22, 24, 71],
-        //         treshold: 25
-        //     }
-        // },
+        {
+            id: 1,
+            name: 'Kiskos Vajk',
+            email: 'kiskosvajk@gmail.com',
+            alerts: {
+                zipcodes: [10, 11, 12, 22, 24, 71],
+                treshold: 25
+            }
+        },
         {
             id: 2,
             name: 'Nemeth Mate',
@@ -61,16 +61,13 @@ const filterByPriceTreshold = async (carSpec, typeId, filteredUsers) => {
             }
         })
         if(vehiclePriceStats) {
-            console.log('got to final with: ', filteredUsers)
             const toAlert = filteredUsers.map(user => {
                 const treshold = (100 - user.alerts.treshold) / 100
                 const { price } = carSpec
                 const { avg, median} = vehiclePriceStats
-                console.log('treshold: ' + treshold, 'price: ' + price, 'alert at avg: ' + avg * treshold, 'alert at median: ' + median * treshold)
                 if(price < (avg * treshold) || price < (median * treshold)) {
                     return user
                 } else {
-                    console.log('no avg price for this vehicle')
                     return null
                 }
             })
