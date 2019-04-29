@@ -1,8 +1,13 @@
 const db = require('./db')
 
 const getPricesFromDb = async (typeId) => {
-    return await db('carspec').select().where('cartype', typeId).then(rows => {
-        if(rows.length >= 5) {
+    const carType = await db('cartype').select().where('id', typeId).then(row => row[0])
+    const { make, model, age } = carType
+    const older = await db('cartype').select().where('make', make).andWhere('model', model).andWhere('age', age - 1).then(row => row[0] ? row[0].id : null)
+    const newer = await db('cartype').select().where('make', make).andWhere('model', model).andWhere('age', age + 1).then(row => row[0] ? row[0].id : null)
+
+    return await db('carspec').select().where('cartype', typeId).orWhere('cartype', older).orWhere('cartype', newer).then(async rows => {
+        if(rows.length >= 5) {            
             const priceCount = rows.map(item => {
                 return Number(item.price)
             })
@@ -64,5 +69,6 @@ const calculateAll = async (typeId) => {
         return false
     }
 }
+
 
 module.exports = calculateAll
