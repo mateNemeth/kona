@@ -4,7 +4,16 @@ const mailIt = require('./mailit')
 
 const checkIfNeedsMailing = async (carSpec, typeId) => {  
     const usersToAlert = await filterUsers(carSpec, typeId)
-    console.log(usersToAlert)
+    if(usersToAlert) {
+        const link = await db('carlist').select().where('id', carSpec.id).then(row => `${row[0].platform}${row[0].link}`)
+        const typeText = await db('cartype').select().where('id', typeId).then(row => `${row[0].make} ${row[0].model} (${row[0].age})`)
+        const avgPercent = Math.round(100-(price/avg * 100))
+        const medianPercent = Math.round(100-(price/median * 100))
+        console.log('found a cheap car, mailing it!')
+        filteredUsers.map(user => {
+            mailIt(typeText, price, link, avgPercent, medianPercent, user)
+        })
+    }
 }
 
 const filterUsers = async (carSpec, typeId) => {
@@ -71,14 +80,7 @@ const filterByPriceTreshold = async (carSpec, typeId, filteredUsers) => {
 }
 
 // const sendMailToFilteredUsers = async (carSpec, typeId, filteredUsers) => {
-//     const link = await db('carlist').select().where('id', carSpec.id).then(row => `${row[0].platform}${row[0].link}`)
-//     const typeText = await db('cartype').select().where('id', typeId).then(row => `${row[0].make} ${row[0].model} (${row[0].age})`)
-//     const avgPercent = Math.round(100-(price/avg * 100))
-//     const medianPercent = Math.round(100-(price/median * 100))
-//     console.log('found a cheap car, mailing it!')
-//     filteredUsers.map(user => {
-//         mailIt(typeText, price, link, avgPercent, medianPercent, user)
-//     })
+//     
 // }
 
 
