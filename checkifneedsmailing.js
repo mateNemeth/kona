@@ -4,7 +4,7 @@ const mailIt = require('./mailit')
 
 const checkIfNeedsMailing = async (carSpec, typeId) => {  
     const usersToAlert = await filterUsers(carSpec, typeId)
-    if(await usersToAlert) {
+    if(usersToAlert && usersToAlert.length) {
         const link = await db('carlist').select().where('id', carSpec.id).then(row => `${row[0].platform}${row[0].link}`)
         const typeText = await db('cartype').select().where('id', typeId).then(row => `${row[0].make} ${row[0].model} (${row[0].age})`)
         const calculatedPrices = await db('average_prices').select().where('id', typeId).then(row=> row[0])
@@ -67,17 +67,19 @@ const filterByPriceTreshold = async (carSpec, typeId, users) => {
             }
         })
         if(vehiclePriceStats) {
-            const toAlert = filteredUsers.map(user => {
+            const toAlert = [];
+            filteredUsers.map(user => {
                 const treshold = (100 - (user.alerts.treshold)) / 100
                 const { price } = carSpec
                 const { avg, median} = vehiclePriceStats
-                console.log(`treshold: ${treshold}, price: ${price}, avg alert at: ${avg * treshold}, median alert at: ${median * treshold}`)
+                console.log(`treshold: ${treshold}, price: ${price}, avg alert at: ${avg * treshold}, median alert at: ${median * treshold}, zip: ${carSpec.zipcode}`)
                 if(price < (avg * treshold) || price < (median * treshold)) {
-                    return user
+                    toAlert.push(user)
                 } else {
-                    return null
+                    return
                 }
             })
+            console.log(toAlert)
             return toAlert
         } 
     }
