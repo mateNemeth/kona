@@ -46,7 +46,6 @@ const filterUsers = async (carSpec, typeId) => {
 const filterByZip = (zipcode, filteredUsers) => {
     const zip = Number(zipcode.toString().slice(0, 2))
     return filteredUsers.filter(user => {
-        console.log(user)
         if(user.alerts.zipcodes.length === 0) {
             return user
         } else {
