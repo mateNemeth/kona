@@ -33,7 +33,7 @@ const filterUsers = async (carSpec, typeId) => {
             name: 'Nemeth Mate',
             email: 'mate.nemeth@outlook.hu',
             alerts: {
-                zipcodes: [],
+                zipcodes: [10, 11, 12, 22, 24, 71],
                 treshold: 25
             }
         }
