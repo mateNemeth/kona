@@ -92,7 +92,7 @@ const carProcess = async (data, id) => {
 	};
 	let price = Number($(".cldt-price").eq(1).find("h2").text().match(numberPattern).join(""));
 	let city = $('.cldt-stage-vendor-text.sc-font-s').find('span.sc-font-bold').eq(0).text()
-	let zipcode = Number($("div[data-item-name='vendor-contact-city']").eq(0).text().match(numberPattern))
+	let zipcode = Number($("div[data-item-name='vendor-contact-city']").eq(0).text().split(' ')[0])
 
 	const vehicle = [
 		{ make, model, age },
