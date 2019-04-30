@@ -85,9 +85,5 @@ const filterByPriceTreshold = async (carSpec, typeId, users) => {
     }
 }
 
-// const sendMailToFilteredUsers = async (carSpec, typeId, filteredUsers) => {
-//     
-// }
-
 
 module.exports = checkIfNeedsMailing
