@@ -32,3 +32,18 @@ CREATE TABLE average_prices (
     avg BIGINT NOT NULL,
     median BIGINT NOT NULL
 );
+
+CREATE TABLE user (
+    id SERIAL NOT NULL PRIMARY KEY,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    alerts INT NOT NULL,
+    password CHAR(60) NOT NULL
+);
+
+CREATE TABLE user_alerts (
+    id SERIAL NOT NULL PRIMARY KEY,
+    zipcodes INT [],
+    treshold INT
+);
