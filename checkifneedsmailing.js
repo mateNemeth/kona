@@ -6,10 +6,13 @@ const mailIt = require('./mailit')
     const usersToAlert = await filterUsers(carSpec, typeId)
     if(usersToAlert && usersToAlert.length) {
         const link = await db('carlist').select().where('id', carSpec.id).then(row => `${row[0].platform}${row[0].link}`)
-        const typeText = await db('cartype').select().where('id', typeId).then(row => `${row[0].make} ${row[0].model} (${row[0].age})`)
+        const type = await db('cartype').select().where('id', typeId).then(row => row[0])
+        const fuelType = await db('carspec').select().where('id', carSpec.id).then(row => `${row[0].fuel}`)
+        const typeText = `${type.make} ${type.model} - (${type.age}, ${fuelType})`
         const calculatedPrices = await db('average_prices').select().where('id', typeId).then(row=> row[0])
         const avgPercent = Math.round(100-(carSpec.price/calculatedPrices.avg * 100))
         const medianPercent = Math.round(100-(carSpec.price/calculatedPrices.median * 100))
+        console.log(typeText)
         usersToAlert.map(user => {
             mailIt(typeText, carSpec.price, link, avgPercent, medianPercent, user)
         })
@@ -21,16 +24,33 @@ const filterUsers = async (carSpec, typeId) => {
     const users = [
         {
             id: 1,
-            name: 'Kiskos Vajk',
+            first_name: 'Vajk',
+            last_name: 'Kiskos',
             email: 'kiskosvajk@gmail.com',
             alerts: {
                 zipcodes: [10, 11, 12, 22, 24, 71],
-                treshold: 25
+                treshold: 25,
+                specific: [
+                    {
+                        type: {ageMax: 1980}
+                    },
+                    {
+                        type: {ageMax: 1990},
+                        spec: {ccmMax: 4000}
+                    },
+                    {
+                        type: {make: 'Jaguar', ageMax: 1996},
+                    },
+                    {
+                        type: {make: 'Mercedes-Benz', model: 'S *', ageMax: 2004}
+                    }
+                ]
             }
         },
         {
             id: 2,
-            name: 'Nemeth Mate',
+            first_name: 'Mate',
+            last_name: 'Nemeth',
             email: 'mate.nemeth@outlook.hu',
             alerts: {
                 zipcodes: [10, 11, 12, 22, 24, 71],
