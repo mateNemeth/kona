@@ -1,8 +1,8 @@
 const db = require('./db')
-const mailIt = require('./mailit')
+const mailIt = require('./cheapAlertMail')
 
 
-    const checkIfNeedsMailing = async (carSpec, typeId) => {  
+const checkIfNeedsMailing = async (carSpec, typeId) => {  
     const usersToAlert = await filterUsers(carSpec, typeId)
     if(usersToAlert && usersToAlert.length) {
         const link = await db('carlist').select().where('id', carSpec.id).then(row => `${row[0].platform}${row[0].link}`)
@@ -32,17 +32,17 @@ const filterUsers = async (carSpec, typeId) => {
                 treshold: 25,
                 specific: [
                     {
-                        type: {ageMax: 1980}
+                        type: {make: '', model: '', ageMin: '', ageMax: 1980}
                     },
                     {
-                        type: {ageMax: 1990},
+                        type: {make: '', model: '', ageMin: '', ageMax: 1990},
                         spec: {ccmMax: 4000}
                     },
                     {
-                        type: {make: 'Jaguar', ageMax: 1996},
+                        type: {make: 'Jaguar', model: '', ageMin: '',  ageMax: 1996},
                     },
                     {
-                        type: {make: 'Mercedes-Benz', model: 'S *', ageMax: 2004}
+                        type: {make: 'Mercedes-Benz', model: 'S *', ageMin: '', ageMax: 2004}
                     }
                 ]
             }
@@ -59,7 +59,7 @@ const filterUsers = async (carSpec, typeId) => {
         }
     ]
     
-    return await filterByPriceTreshold(carSpec, typeId, users)
+    return await applyAllFilter(carSpec, typeId, users)
 }
 
 const filterByZip = (zipcode, filteredUsers) => {
@@ -73,7 +73,11 @@ const filterByZip = (zipcode, filteredUsers) => {
     })
 }
 
-const filterByPriceTreshold = async (carSpec, typeId, users) => {
+const carTypeFilter = (carSpec) => {
+    
+}
+
+const applyAllFilter = async (carSpec, typeId, users) => {
     const filteredUsers = await filterByZip(carSpec.zipcode, users)
     if (!filteredUsers) {
         return null

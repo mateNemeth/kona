@@ -2,7 +2,6 @@ const axios = require('axios')
 const cheerio = require('cheerio')
 const calculateAll = require('./calculateAvg')
 const db = require('./db')
-const checkIfNeedsMailing = require('./checkifneedsmailing')
 
 
 const findToScrape = async () => {
@@ -126,17 +125,25 @@ const saveIntoTable = async () => {
 		if (resp) {
 			const spec = resp[1]
 			const type = resp[0]
-			return saveTypeIntoDb(type).then(resp => {
-				let typeId = resp
+			return saveTypeIntoDb(type).then(typeId => {
 				calculateAll(typeId)
 				saveSpecIntoDb(spec, typeId)
-				checkIfNeedsMailing(spec, typeId)
+				saveEntryToWorkingQueue(spec.id)
 			})
 		} else {
 			return
 		}
 	})
 	return result
+}
+
+const saveEntryToWorkingQueue = async (id) => {
+	return await db('working_queue').select().where('id', id).then(rows => {
+		if(rows.length === 0) {
+			return db('working_queue').insert({ id })
+		} 
+		return;
+	})
 }
 	
 const saveSpecIntoDb = async (spec, typeId) => {
