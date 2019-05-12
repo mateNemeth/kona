@@ -6,6 +6,7 @@ const checkIfNeedsMailing = async () => {
     if (carSpec === 'no work found') {
         return
     } else {
+        removeFromQueue(carSpec.id)
         const typeId = carSpec.type
         const usersToAlert = await filterUsers(carSpec, typeId)
         if(usersToAlert && usersToAlert.length) {
@@ -22,6 +23,10 @@ const checkIfNeedsMailing = async () => {
             })
         }
     }
+}
+
+const removeFromQueue = async (id) => {
+    return await db('working_queue').where('id', id).del()
 }
 
 const findWork = async () => {
@@ -122,6 +127,6 @@ const applyAllFilter = async (carSpec, typeId, users) => {
 
 const minutes = 1, the_interval = minutes * 60 * 1000;
 
-setInterval(() => {
+// setInterval(() => {
     checkIfNeedsMailing()
-}, the_interval);
+// }, the_interval);
