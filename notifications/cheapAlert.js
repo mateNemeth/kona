@@ -1,22 +1,39 @@
-const db = require('./db')
+const db = require('../db')
 const mailIt = require('./cheapAlertMail')
 
-
-const checkIfNeedsMailing = async (carSpec, typeId) => {  
-    const usersToAlert = await filterUsers(carSpec, typeId)
-    if(usersToAlert && usersToAlert.length) {
-        const link = await db('carlist').select().where('id', carSpec.id).then(row => `${row[0].platform}${row[0].link}`)
-        const type = await db('cartype').select().where('id', typeId).then(row => row[0])
-        const fuelType = await db('carspec').select().where('id', carSpec.id).then(row => `${row[0].fuel}`)
-        const typeText = `${type.make} ${type.model} - (${type.age}, ${fuelType})`
-        const calculatedPrices = await db('average_prices').select().where('id', typeId).then(row=> row[0])
-        const avgPercent = Math.round(100-(carSpec.price/calculatedPrices.avg * 100))
-        const medianPercent = Math.round(100-(carSpec.price/calculatedPrices.median * 100))
-        console.log(typeText)
-        usersToAlert.map(user => {
-            mailIt(typeText, carSpec.price, link, avgPercent, medianPercent, user)
-        })
+const checkIfNeedsMailing = async () => {
+    const carSpec = await findWork()
+    if (carSpec === 'no work found') {
+        return
+    } else {
+        const typeId = carSpec.type
+        const usersToAlert = await filterUsers(carSpec, typeId)
+        if(usersToAlert && usersToAlert.length) {
+            const link = await db('carlist').select().where('id', carSpec.id).then(row => `${row[0].platform}${row[0].link}`)
+            const type = await db('cartype').select().where('id', typeId).then(row => row[0])
+            const fuelType = await db('carspec').select().where('id', carSpec.id).then(row => `${row[0].fuel}`)
+            const typeText = `${type.make} ${type.model} - (${type.age}, ${fuelType})`
+            const calculatedPrices = await db('average_prices').select().where('id', typeId).then(row=> row[0])
+            const avgPercent = Math.round(100-(carSpec.price/calculatedPrices.avg * 100))
+            const medianPercent = Math.round(100-(carSpec.price/calculatedPrices.median * 100))
+            console.log(typeText)
+            usersToAlert.map(user => {
+                mailIt(typeText, carSpec.price, link, avgPercent, medianPercent, user)
+            })
+        }
     }
+}
+
+const findWork = async () => {
+    return await db('working_queue').where('working', false).first().then(row => {
+        if(row) {
+            return db('working_queue').where('id', row.id).returning('id').update('working', true).then(resp => {
+                return db('carspec').where('id', resp[0]).then(resp => resp)
+            })
+        } else {
+            return 'no work found'
+        }
+    })
 }
 
 const filterUsers = async (carSpec, typeId) => {
@@ -73,10 +90,6 @@ const filterByZip = (zipcode, filteredUsers) => {
     })
 }
 
-const carTypeFilter = (carSpec) => {
-    
-}
-
 const applyAllFilter = async (carSpec, typeId, users) => {
     const filteredUsers = await filterByZip(carSpec.zipcode, users)
     if (!filteredUsers) {
@@ -107,4 +120,8 @@ const applyAllFilter = async (carSpec, typeId, users) => {
 }
 
 
-module.exports = checkIfNeedsMailing
+const minutes = 1, the_interval = minutes * 60 * 1000;
+
+setInterval(() => {
+    checkIfNeedsMailing()
+}, the_interval);
