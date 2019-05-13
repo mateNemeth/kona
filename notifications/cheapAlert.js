@@ -69,16 +69,16 @@ const filterUsers = async (carSpec) => {
                 ]
             }
         },
-        {
-            id: 2,
-            first_name: 'Mate',
-            last_name: 'Nemeth',
-            email: 'mate.nemeth@outlook.hu',
-            alerts: {
-                zipcodes: [10, 11, 12, 22, 24, 71],
-                treshold: 25
-            }
-        }
+        // {
+        //     id: 2,
+        //     first_name: 'Mate',
+        //     last_name: 'Nemeth',
+        //     email: 'mate.nemeth@outlook.hu',
+        //     alerts: {
+        //         zipcodes: [10, 11, 12, 22, 24, 71],
+        //         treshold: 25
+        //     }
+        // }
     ]
     
     return await applyAllFilter(carSpec, users)
