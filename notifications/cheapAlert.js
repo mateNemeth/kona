@@ -4,20 +4,20 @@ const mailIt = require('./cheapAlertMail')
 const checkIfNeedsMailing = async () => {
     const carSpec = await findWork()
     if (carSpec === 'no work found') {
+        minutes = 10;
         return
     } else {
+        minutes = 0.16;
         removeFromQueue(carSpec.id)
-        const typeId = carSpec.type
-        const usersToAlert = await filterUsers(carSpec, typeId)
+        const usersToAlert = await filterUsers(carSpec)
         if(usersToAlert && usersToAlert.length) {
             const link = await db('carlist').select().where('id', carSpec.id).then(row => `${row[0].platform}${row[0].link}`)
-            const type = await db('cartype').select().where('id', typeId).then(row => row[0])
+            const type = await db('cartype').select().where('id', carSpec.cartype).then(row => row[0])
             const fuelType = await db('carspec').select().where('id', carSpec.id).then(row => `${row[0].fuel}`)
             const typeText = `${type.make} ${type.model} - (${type.age}, ${fuelType})`
-            const calculatedPrices = await db('average_prices').select().where('id', typeId).then(row=> row[0])
+            const calculatedPrices = await db('average_prices').select().where('id', carSpec.cartype).then(row=> row[0])
             const avgPercent = Math.round(100-(carSpec.price/calculatedPrices.avg * 100))
             const medianPercent = Math.round(100-(carSpec.price/calculatedPrices.median * 100))
-            console.log(typeText)
             usersToAlert.map(user => {
                 mailIt(typeText, carSpec.price, link, avgPercent, medianPercent, user)
             })
@@ -33,7 +33,7 @@ const findWork = async () => {
     return await db('working_queue').where('working', false).first().then(row => {
         if(row) {
             return db('working_queue').where('id', row.id).returning('id').update('working', true).then(resp => {
-                return db('carspec').where('id', resp[0]).then(resp => resp)
+                return db('carspec').where('id', resp[0]).then(resp => resp[0])
             })
         } else {
             return 'no work found'
@@ -41,34 +41,34 @@ const findWork = async () => {
     })
 }
 
-const filterUsers = async (carSpec, typeId) => {
+const filterUsers = async (carSpec) => {
     //hardcoded for now, need to create new usertable
     const users = [
-        {
-            id: 1,
-            first_name: 'Vajk',
-            last_name: 'Kiskos',
-            email: 'kiskosvajk@gmail.com',
-            alerts: {
-                zipcodes: [10, 11, 12, 22, 24, 71],
-                treshold: 25,
-                specific: [
-                    {
-                        type: {make: '', model: '', ageMin: '', ageMax: 1980}
-                    },
-                    {
-                        type: {make: '', model: '', ageMin: '', ageMax: 1990},
-                        spec: {ccmMax: 4000}
-                    },
-                    {
-                        type: {make: 'Jaguar', model: '', ageMin: '',  ageMax: 1996},
-                    },
-                    {
-                        type: {make: 'Mercedes-Benz', model: 'S *', ageMin: '', ageMax: 2004}
-                    }
-                ]
-            }
-        },
+        // {
+        //     id: 1,
+        //     first_name: 'Vajk',
+        //     last_name: 'Kiskos',
+        //     email: 'kiskosvajk@gmail.com',
+        //     alerts: {
+        //         zipcodes: [10, 11, 12, 22, 24, 71],
+        //         treshold: 25,
+        //         specific: [
+        //             {
+        //                 type: {make: '', model: '', ageMin: '', ageMax: 1980}
+        //             },
+        //             {
+        //                 type: {make: '', model: '', ageMin: '', ageMax: 1990},
+        //                 spec: {ccmMax: 4000}
+        //             },
+        //             {
+        //                 type: {make: 'Jaguar', model: '', ageMin: '',  ageMax: 1996},
+        //             },
+        //             {
+        //                 type: {make: 'Mercedes-Benz', model: 'S *', ageMin: '', ageMax: 2004}
+        //             }
+        //         ]
+        //     }
+        // },
         {
             id: 2,
             first_name: 'Mate',
@@ -81,7 +81,7 @@ const filterUsers = async (carSpec, typeId) => {
         }
     ]
     
-    return await applyAllFilter(carSpec, typeId, users)
+    return await applyAllFilter(carSpec, users)
 }
 
 const filterByZip = (zipcode, filteredUsers) => {
@@ -95,12 +95,12 @@ const filterByZip = (zipcode, filteredUsers) => {
     })
 }
 
-const applyAllFilter = async (carSpec, typeId, users) => {
+const applyAllFilter = async (carSpec, users) => {
     const filteredUsers = await filterByZip(carSpec.zipcode, users)
     if (!filteredUsers) {
         return null
     } else {
-        const vehiclePriceStats = await db('average_prices').select().where('id', typeId).then(row => {
+        const vehiclePriceStats = await db('average_prices').select().where('id', carSpec.cartype).then(row => {
             if(row) {
                 return row[0]
             } else {
@@ -125,8 +125,8 @@ const applyAllFilter = async (carSpec, typeId, users) => {
 }
 
 
-const minutes = 1, the_interval = minutes * 60 * 1000;
+let minutes = 0.16, the_interval = minutes * 60 * 1000;
 
-// setInterval(() => {
+setInterval(() => {
     checkIfNeedsMailing()
-// }, the_interval);
+}, the_interval);
