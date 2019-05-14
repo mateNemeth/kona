@@ -4,10 +4,8 @@ const mailIt = require('./cheapAlertMail')
 const checkIfNeedsMailing = async () => {
     const carSpec = await findWork()
     if (carSpec === 'no work found') {
-        minutes = 10;
-        return
+        return minutes = 10;
     } else {
-        minutes = 0.16;
         removeFromQueue(carSpec.id)
         const usersToAlert = await filterUsers(carSpec)
         if(usersToAlert && usersToAlert.length) {
@@ -22,6 +20,7 @@ const checkIfNeedsMailing = async () => {
                 mailIt(typeText, carSpec.price, link, avgPercent, medianPercent, user)
             })
         }
+        return minutes = 0.16;
     }
 }
 
@@ -42,55 +41,19 @@ const findWork = async () => {
 }
 
 const filterUsers = async (carSpec) => {
-    //hardcoded for now, need to create new usertable
-    const users = [
-        {
-            id: 1,
-            first_name: 'Vajk',
-            last_name: 'Kiskos',
-            email: 'kiskosvajk@gmail.com',
-            alerts: {
-                zipcodes: [10, 11, 12, 22, 24, 71],
-                treshold: 25,
-                specific: [
-                    {
-                        type: {make: '', model: '', ageMin: '', ageMax: 1980}
-                    },
-                    {
-                        type: {make: '', model: '', ageMin: '', ageMax: 1990},
-                        spec: {ccmMax: 4000}
-                    },
-                    {
-                        type: {make: 'Jaguar', model: '', ageMin: '',  ageMax: 1996},
-                    },
-                    {
-                        type: {make: 'Mercedes-Benz', model: 'S *', ageMin: '', ageMax: 2004}
-                    }
-                ]
-            }
-        },
-        // {
-        //     id: 2,
-        //     first_name: 'Mate',
-        //     last_name: 'Nemeth',
-        //     email: 'mate.nemeth@outlook.hu',
-        //     alerts: {
-        //         zipcodes: [10, 11, 12, 22, 24, 71],
-        //         treshold: 25
-        //     }
-        // }
-    ]
-    
-    return await applyAllFilter(carSpec, users)
+    const users = await db('user_alerts').select().then(resp => resp)
+    return applyAllFilter(carSpec, users)
 }
 
-const filterByZip = (zipcode, filteredUsers) => {
+const filterByZip = async (zipcode, filteredUsers) => {
     const zip = Number(zipcode.toString().slice(0, 2))
-    return filteredUsers.filter(user => {
-        if(user.alerts.zipcodes.length === 0) {
+    console.log(filteredUsers)
+    return await filteredUsers.filter(user => {
+        // console.log(`user: ${user}, zipcodes: ${user.zipcodes}`)
+        if(user.zipcodes.length === 0) {
             return user
         } else {
-            return user.alerts.zipcodes.indexOf(zip) !== -1
+            return user.zipcodes.indexOf(zip) !== -1
         }
     })
 }
@@ -110,10 +73,11 @@ const applyAllFilter = async (carSpec, users) => {
         if(vehiclePriceStats) {
             const toAlert = [];
             filteredUsers.map(user => {
-                const treshold = (100 - (user.alerts.treshold)) / 100
+                const treshold = (100 - (user.treshold)) / 100
                 const { price } = carSpec
                 const { avg, median} = vehiclePriceStats
                 if(price < (avg * treshold) || price < (median * treshold)) {
+                    const getUserData = await db('users').select().where('alerts', )
                     toAlert.push(user)
                 } else {
                     return
@@ -130,3 +94,42 @@ let minutes = 0.16, the_interval = minutes * 60 * 1000;
 setInterval(() => {
     checkIfNeedsMailing()
 }, the_interval);
+
+//hardcoded for now, need to create new usertable
+    // const users = [
+    //     {
+    //         id: 1,
+    //         first_name: 'Vajk',
+    //         last_name: 'Kiskos',
+    //         email: 'kiskosvajk@gmail.com',
+    //         alerts: {
+    //             zipcodes: [10, 11, 12, 22, 24, 71],
+    //             treshold: 25,
+    //             specific: [
+    //                 {
+    //                     type: {make: '', model: '', ageMin: '', ageMax: 1980}
+    //                 },
+    //                 {
+    //                     type: {make: '', model: '', ageMin: '', ageMax: 1990},
+    //                     spec: {ccmMax: 4000}
+    //                 },
+    //                 {
+    //                     type: {make: 'Jaguar', model: '', ageMin: '',  ageMax: 1996},
+    //                 },
+    //                 {
+    //                     type: {make: 'Mercedes-Benz', model: 'S *', ageMin: '', ageMax: 2004}
+    //                 }
+    //             ]
+    //         }
+    //     },
+        // {
+        //     id: 2,
+        //     first_name: 'Mate',
+        //     last_name: 'Nemeth',
+        //     email: 'mate.nemeth@outlook.hu',
+        //     alerts: {
+        //         zipcodes: [10, 11, 12, 22, 24, 71],
+        //         treshold: 25
+        //     }
+        // }
+    // ]

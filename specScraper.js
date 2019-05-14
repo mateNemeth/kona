@@ -53,8 +53,8 @@ const carProcess = async (data, id) => {
 	let model = $("dt:contains('Modell')").next().text().trim();
 	let age = Number($(".sc-font-l.cldt-stage-primary-keyfact").eq(4).text().match(numberPattern)[1]);
 	let km = () => {
-		let result = Number($(".sc-font-l.cldt-stage-primary-keyfact").eq(3).text().match(numberPattern))
-		return result ? result.join("") : 0
+		let result = $(".sc-font-l.cldt-stage-primary-keyfact").eq(3).text().match(numberPattern)
+		return (result && result.length > 1) ? Number(result.join("")) : 0
 	}
 	let kw = () => {
 		let result = Number($(".sc-font-l.cldt-stage-primary-keyfact").eq(5).text().match(numberPattern))

@@ -43,12 +43,20 @@ CREATE TABLE users (
     first_name VARCHAR(50) NOT NULL,
     last_name VARCHAR(50) NOT NULL,
     email VARCHAR(255) NOT NULL,
-    alerts INT NOT NULL,
-    password CHAR(60) NOT NULL
+    password CHAR(60) NOT NULL,
+    alerts INT []
 );
 
 CREATE TABLE user_alerts (
-    id SERIAL NOT NULL PRIMARY KEY,
-    zipcodes INT[],
-    treshold INT
+    id BIGSERIAL NOT NULL PRIMARY KEY,
+    zipcodes INT [],
+    treshold INT,
+    make VARCHAR(50),
+    model VARCHAR(50),
+    age INT,
+    ccm INT,  
+    fuel VARCHAR(20),
+    transmission VARCHAR(20),
+    kw INT,
+    km INT
 );
