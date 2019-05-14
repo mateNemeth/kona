@@ -52,8 +52,14 @@ const carProcess = async (data, id) => {
 	let make = $("dt:contains('Márka')").next().text().trim();
 	let model = $("dt:contains('Modell')").next().text().trim();
 	let age = Number($(".sc-font-l.cldt-stage-primary-keyfact").eq(4).text().match(numberPattern)[1]);
-	let km = Number($(".sc-font-l.cldt-stage-primary-keyfact").eq(3).text().match(numberPattern).join("")) || 0;
-	let kw = Number($(".sc-font-l.cldt-stage-primary-keyfact").eq(5).text().match(numberPattern)) || 0;
+	let km = () => {
+		let result = Number($(".sc-font-l.cldt-stage-primary-keyfact").eq(3).text().match(numberPattern))
+		return result ? result.join("") : 0
+	}
+	let kw = () => {
+		let result = Number($(".sc-font-l.cldt-stage-primary-keyfact").eq(5).text().match(numberPattern))
+		return result ? result : 0
+	} 
 	let fuel = () => {
 		if (lookFor($("dt"), "Üzemanyag").length > 0) {
 			if (lookFor($("dt"), "Üzemanyag").next().text().trim() === "Dízel (Particulate Filter)") {
@@ -95,7 +101,7 @@ const carProcess = async (data, id) => {
 
 	const vehicle = [
 		{ make, model, age },
-		{ id, km, kw, fuel: fuel(), transmission: transmission(), ccm: ccm(), price, city, zipcode }
+		{ id, km: km(), kw: kw(), fuel: fuel(), transmission: transmission(), ccm: ccm(), price, city, zipcode }
 	]
 	return vehicle
 }
