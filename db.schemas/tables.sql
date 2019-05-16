@@ -71,8 +71,8 @@ CREATE TABLE specific_alerts (
     treshold INT
 );
 
-INSERT INTO users (first_name, last_name, email, password, cheap_alert, specific_alert)
-VALUES ('Vajk', 'Kiskos', 'kiskosvajk@gmail.com', 'asdasdasdasdasdsadsaasdasdasdasdasdsadsaasdasdasdasdasdsadsa', 1, '{1}');
+INSERT INTO users (first_name, last_name, email, password, cheap_alert)
+VALUES ('Vajk', 'Kiskos', 'kiskosvajk@gmail.com', 'asdasdasdasdasdsadsaasdasdasdasdasdsadsaasdasdasdasdasdsadsa', 1);
 
 INSERT INTO users (first_name, last_name, email, password, cheap_alert)
 VALUES ('Mate', 'Nemeth', 'mate.nemeth@outlook.hu', 'asdasdasdasdasdsadsaasdasdasdasdasdsadsaasdasdasdasdasdsadsa', 2);
