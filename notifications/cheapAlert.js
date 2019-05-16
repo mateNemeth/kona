@@ -49,7 +49,6 @@ const getUsers = async () => {
 //SEND DB DATA THROGUH FILTERING FUNCTIONS
 const filterUsers = async (carSpec) => {
     const users = await getUsers()
-    console.log(users)
     return applyAllFilter(carSpec, users)
 }
 
