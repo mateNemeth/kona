@@ -9,6 +9,7 @@ const checkIfNeedsMailing = async () => {
         removeFromQueue(carSpec.id)
         const usersToAlert = await filterUsers(carSpec)
         if(usersToAlert && usersToAlert.length) {
+            console.log(usersToAlert)
             const link = await db('carlist').select().where('id', carSpec.id).then(row => `${row[0].platform}${row[0].link}`)
             const type = await db('cartype').select().where('id', carSpec.cartype).then(row => row[0])
             const fuelType = await db('carspec').select().where('id', carSpec.id).then(row => `${row[0].fuel}`)
@@ -40,17 +41,24 @@ const findWork = async () => {
     })
 }
 
+// GET ALL CHEAP_ALERTS SETTINGS FROM DB
+const getUsers = async () => {
+    return await db('cheap_alerts').join('users', {'cheap_alerts.id': 'users.cheap_alert'}).select('email', 'treshold', 'zipcodes').then(resp => resp)
+}
+
+//SEND DB DATA THROGUH FILTERING FUNCTIONS
 const filterUsers = async (carSpec) => {
-    const users = await db('user_alerts').select().then(resp => resp)
+    const users = await getUsers()
     return applyAllFilter(carSpec, users)
 }
 
+
+//FILTER USERS WHOM NEEDS TO BE NOTIFIED BY ZIP CODE SETTINGS
 const filterByZip = async (zipcode, filteredUsers) => {
     const zip = Number(zipcode.toString().slice(0, 2))
-    console.log(filteredUsers)
     return await filteredUsers.filter(user => {
-        // console.log(`user: ${user}, zipcodes: ${user.zipcodes}`)
-        if(user.zipcodes.length === 0) {
+        //NO ZIPCODE MEANS USER WANTS NOTIFICATIONS FROM WHOLE COUNTRY
+        if(!user.zipcodes || user.zipcodes.length === 0) {
             return user
         } else {
             return user.zipcodes.indexOf(zip) !== -1
@@ -77,7 +85,6 @@ const applyAllFilter = async (carSpec, users) => {
                 const { price } = carSpec
                 const { avg, median} = vehiclePriceStats
                 if(price < (avg * treshold) || price < (median * treshold)) {
-                    const getUserData = await db('users').select().where('alerts', )
                     toAlert.push(user)
                 } else {
                     return

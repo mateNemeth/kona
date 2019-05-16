@@ -44,19 +44,41 @@ CREATE TABLE users (
     last_name VARCHAR(50) NOT NULL,
     email VARCHAR(255) NOT NULL,
     password CHAR(60) NOT NULL,
-    alerts INT []
+    cheap_alert INT,
+    specific_alert INT []
 );
 
-CREATE TABLE user_alerts (
+CREATE TABLE cheap_alerts (
+    id INT NOT NULL PRIMARY KEY,
+    zipcodes INT [],
+    treshold INT
+);
+
+CREATE TABLE specific_alerts (
     id BIGSERIAL NOT NULL PRIMARY KEY,
     zipcodes INT [],
-    treshold INT,
     make VARCHAR(50),
     model VARCHAR(50),
-    age INT,
-    ccm INT,  
+    ageMax INT,
+    ageMin INT,
+    ccm INT,
+    km INT,
+    kw INT,
     fuel VARCHAR(20),
     transmission VARCHAR(20),
-    kw INT,
-    km INT
+    priceMax INT,
+    priceMin INT,
+    treshold INT
 );
+
+INSERT INTO users (first_name, last_name, email, password, cheap_alert, specific_alert)
+VALUES ('Vajk', 'Kiskos', 'kiskosvajk@gmail.com', 'asdasdasdasdasdsadsaasdasdasdasdasdsadsaasdasdasdasdasdsadsa', 1, '{1}');
+
+INSERT INTO users (first_name, last_name, email, password, cheap_alert)
+VALUES ('Mate', 'Nemeth', 'mate.nemeth@outlook.hu', 'asdasdasdasdasdsadsaasdasdasdasdasdsadsaasdasdasdasdasdsadsa', 2);
+
+INSERT INTO cheap_alerts (id, zipcodes, treshold)
+VALUES (1, '{10, 11, 12, 22, 24, 71}', 25);
+
+INSERT INTO cheap_alerts (id, treshold)
+VALUES (2, 25);
