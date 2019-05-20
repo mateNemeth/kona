@@ -1,45 +1,5 @@
 const db = require('../db')
-const mailIt = require('./cheapAlertMail')
-
-const checkIfNeedsMailing = async () => {
-    const carSpec = await findWork()
-    if (carSpec === 'no work found') {
-        return minutes = 10;
-    } else {
-        removeFromQueue(carSpec.id)
-        const usersToAlert = await filterUsers(carSpec)
-        if(usersToAlert && usersToAlert.length) {
-            console.log(usersToAlert)
-            const link = await db('carlist').select().where('id', carSpec.id).then(row => `${row[0].platform}${row[0].link}`)
-            const type = await db('cartype').select().where('id', carSpec.cartype).then(row => row[0])
-            const fuelType = await db('carspec').select().where('id', carSpec.id).then(row => `${row[0].fuel}`)
-            const typeText = `${type.make} ${type.model} - (${type.age}, ${fuelType})`
-            const calculatedPrices = await db('average_prices').select().where('id', carSpec.cartype).then(row=> row[0])
-            const avgPercent = Math.round(100-(carSpec.price/calculatedPrices.avg * 100))
-            const medianPercent = Math.round(100-(carSpec.price/calculatedPrices.median * 100))
-            usersToAlert.map(user => {
-                mailIt(typeText, carSpec.price, link, avgPercent, medianPercent, user)
-            })
-        }
-        return minutes = 0.16;
-    }
-}
-
-const removeFromQueue = async (id) => {
-    return await db('working_queue').where('id', id).del()
-}
-
-const findWork = async () => {
-    return await db('working_queue').where('working', false).first().then(row => {
-        if(row) {
-            return db('working_queue').where('id', row.id).returning('id').update('working', true).then(resp => {
-                return db('carspec').where('id', resp[0]).then(resp => resp[0])
-            })
-        } else {
-            return 'no work found'
-        }
-    })
-}
+const cheapAlertMail = require('./cheapAlertMail')
 
 // GET ALL CHEAP_ALERTS SETTINGS FROM DB
 const getUsers = async () => {
@@ -47,17 +7,31 @@ const getUsers = async () => {
 }
 
 //SEND DB DATA THROGUH FILTERING FUNCTIONS
-const filterUsers = async (carSpec) => {
-    const users = await getUsers()
-    return applyAllFilter(carSpec, users)
+const cheapAlert = async (carSpec) => {
+    const allUsers = await getUsers()
+    const users =  applyAllFilter(carSpec, allUsers)
+    if(users && users.length) {
+        console.log(usersToAlert)
+        const link = await db('carlist').select().where('id', carSpec.id).then(row => `${row[0].platform}${row[0].link}`)
+        const type = await db('cartype').select().where('id', carSpec.cartype).then(row => row[0])
+        const fuelType = await db('carspec').select().where('id', carSpec.id).then(row => `${row[0].fuel}`)
+        const typeText = `${type.make} ${type.model} - (${type.age}, ${fuelType})`
+        const calculatedPrices = await db('average_prices').select().where('id', carSpec.cartype).then(row=> row[0])
+        const avgPercent = Math.round(100-(carSpec.price/calculatedPrices.avg * 100))
+        const medianPercent = Math.round(100-(carSpec.price/calculatedPrices.median * 100))
+        users.map(user => {
+            cheapAlertMail(typeText, carSpec.price, link, avgPercent, medianPercent, user)
+        })
+    }
 }
+
 
 
 //FILTER USERS WHOM NEEDS TO BE NOTIFIED BY ZIP CODE SETTINGS
 const filterByZip = async (zipcode, filteredUsers) => {
     const zip = Number(zipcode.toString().slice(0, 2))
     return await filteredUsers.filter(user => {
-        //NO ZIPCODE MEANS USER WANTS NOTIFICATIONS FROM WHOLE COUNTRY
+        //NO ZIPCODE MEANS USER WANTS NOTIFICATIONS FROM EVERYWHERE
         if(!user.zipcodes || user.zipcodes.length === 0) {
             return user
         } else {
@@ -95,12 +69,7 @@ const applyAllFilter = async (carSpec, users) => {
     }
 }
 
-
-let minutes = 0.16, the_interval = minutes * 60 * 1000;
-
-setInterval(() => {
-    checkIfNeedsMailing()
-}, the_interval);
+module.exports = cheapAlert
 
 //hardcoded for now, need to create new usertable
     // const users = [
