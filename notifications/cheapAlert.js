@@ -9,9 +9,8 @@ const getUsers = async () => {
 //SEND DB DATA THROGUH FILTERING FUNCTIONS
 const cheapAlert = async (carSpec) => {
     const allUsers = await getUsers()
-    const users =  applyAllFilter(carSpec, allUsers)
+    const users =  await applyAllFilter(carSpec, allUsers)
     if(users && users.length) {
-        console.log(usersToAlert)
         const link = await db('carlist').select().where('id', carSpec.id).then(row => `${row[0].platform}${row[0].link}`)
         const type = await db('cartype').select().where('id', carSpec.cartype).then(row => row[0])
         const fuelType = await db('carspec').select().where('id', carSpec.id).then(row => `${row[0].fuel}`)
