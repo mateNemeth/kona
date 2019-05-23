@@ -8,6 +8,7 @@ const getUsers = async () => {
 
 //SEND DB DATA THROGUH FILTERING FUNCTIONS
 const cheapAlert = async (carSpec) => {
+    console.log(carSpec)
     const allUsers = await getUsers()
     const users =  await applyAllFilter(carSpec, allUsers)
     if(users && users.length) {
@@ -69,42 +70,3 @@ const applyAllFilter = async (carSpec, users) => {
 }
 
 module.exports = cheapAlert
-
-//hardcoded for now, need to create new usertable
-    // const users = [
-    //     {
-    //         id: 1,
-    //         first_name: 'Vajk',
-    //         last_name: 'Kiskos',
-    //         email: 'kiskosvajk@gmail.com',
-    //         alerts: {
-    //             zipcodes: [10, 11, 12, 22, 24, 71],
-    //             treshold: 25,
-    //             specific: [
-    //                 {
-    //                     type: {make: '', model: '', ageMin: '', ageMax: 1980}
-    //                 },
-    //                 {
-    //                     type: {make: '', model: '', ageMin: '', ageMax: 1990},
-    //                     spec: {ccmMax: 4000}
-    //                 },
-    //                 {
-    //                     type: {make: 'Jaguar', model: '', ageMin: '',  ageMax: 1996},
-    //                 },
-    //                 {
-    //                     type: {make: 'Mercedes-Benz', model: 'S *', ageMin: '', ageMax: 2004}
-    //                 }
-    //             ]
-    //         }
-    //     },
-        // {
-        //     id: 2,
-        //     first_name: 'Mate',
-        //     last_name: 'Nemeth',
-        //     email: 'mate.nemeth@outlook.hu',
-        //     alerts: {
-        //         zipcodes: [10, 11, 12, 22, 24, 71],
-        //         treshold: 25
-        //     }
-        // }
-    // ]
