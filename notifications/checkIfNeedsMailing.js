@@ -33,6 +33,6 @@ const findWork = async () => {
 
 let minutes = 0.16, the_interval = minutes * 60 * 1000;
 
-// setInterval(() => {
+setInterval(() => {
     checkIfNeedsMailing()
-// }, the_interval);
+}, the_interval);
