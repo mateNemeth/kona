@@ -108,27 +108,9 @@ const specAlert = async (carSpec) => {
         const fuelType = await db('carspec').select().where('id', carSpec.id).then(row => `${row[0].fuel}`)
         const typeText = `${type.make} ${type.model} - (${type.age}, ${fuelType})`
         users.map(user => {
-            console.log(user)
             specAlertMail(typeText, carSpec.price, link, user)
         })
     }
 }
-
-const carSpec = {
-    id: '12645',
-    cartype: '809',
-    ccm: 5000,
-    fuel: 'Dízel',
-    transmission: 'Automata',
-    price: 3400,
-    kw: 77,
-    km: 190000,
-    zipcode: 1120,
-    make: 'Skoda',
-    model: 'Octavia',
-    age: 1978 
-}
-
-specAlert(carSpec)
 
 module.exports = specAlert
