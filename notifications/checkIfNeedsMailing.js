@@ -7,6 +7,7 @@ const checkIfNeedsMailing = async () => {
     if (carSpec === 'no work found') {
         return minutes = 10;
     } else {
+        console.log(carSpec)
         removeFromQueue(carSpec.id)
         specAlert(carSpec)
         cheapAlert(carSpec)        
@@ -33,6 +34,6 @@ const findWork = async () => {
 
 let minutes = 0.16, the_interval = minutes * 60 * 1000;
 
-setInterval(() => {
+// setInterval(() => {
     checkIfNeedsMailing()
-}, the_interval);
+// }, the_interval);

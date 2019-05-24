@@ -3,12 +3,9 @@ const specAlertMail = require('./specAlertMail')
 
 const getAlerts = async () => {
     return await db('specific_alerts').select().then(async resp => {
-        const email = await db('users').select('email').whereRaw(`${resp[0].id}=ANY(specific_alert)`).then(resp => resp[0].email)
         const keys = Object.keys(resp[0])
         const values = resp.map(row => {
-            let filter = {
-                email
-            };
+            let filter = {};
             for(let i = 0; i < keys.length; i++) {
                 if(row[keys[i]]) {
                     filter[keys[i]] = row[keys[i]]
@@ -93,26 +90,45 @@ const checkAlert = async (carSpec, alerts) => {
                     : false
                 : true)
         ) {
-            return alert.email
+            return alert
         }
     })
-    const toNotify = result.map(item => item.email)
+    const toNotify = await Promise.all(result.map(async item => {
+        return await db('users').select('email').whereRaw(`${item.id}=ANY(specific_alert)`).then(resp => resp[0].email)
+    }))
     return toNotify
 }
 
 const specAlert = async (carSpec) => {
     const alerts = await getAlerts()
-    const filteredAlerts = await checkAlert(carSpec, alerts)
-    const users = filteredAlerts.filter((item, index) => filteredAlerts.indexOf(item) === index)
+    const users = await checkAlert(carSpec, alerts)
     if(users && users.length) {
         const link = await db('carlist').select().where('id', carSpec.id).then(row => `${row[0].platform}${row[0].link}`)
         const type = await db('cartype').select().where('id', carSpec.cartype).then(row => row[0])
         const fuelType = await db('carspec').select().where('id', carSpec.id).then(row => `${row[0].fuel}`)
         const typeText = `${type.make} ${type.model} - (${type.age}, ${fuelType})`
         users.map(user => {
+            console.log(user)
             specAlertMail(typeText, carSpec.price, link, user)
         })
     }
 }
+
+const carSpec = {
+    id: '12645',
+    cartype: '809',
+    ccm: 5000,
+    fuel: 'Dízel',
+    transmission: 'Automata',
+    price: 3400,
+    kw: 77,
+    km: 190000,
+    zipcode: 1120,
+    make: 'Skoda',
+    model: 'Octavia',
+    age: 1978 
+}
+
+specAlert(carSpec)
 
 module.exports = specAlert

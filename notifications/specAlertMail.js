@@ -4,13 +4,12 @@ const HOST = 'api.eu.mailgun.net'
 const mailgun = require('mailgun-js')({apiKey: API_KEY, domain: DOMAIN, host: HOST});
 
 
-const mailIt = (typeText, price, link, avgPercent, medianPercent, user) => {
+const mailIt = (typeText, price, link, user) => {
   const data = {
     from: 'Car Alert <no-reply@mail.matenemeth.hu>',
     to: `${user}`,
     subject: `${typeText} - €${price},-`,
-    text: `A medián eladási ár ${medianPercent}%-a, az átlagár ${avgPercent}%-a.
-    A hírdetés itt található: ${link}`,
+    text: `Új hirdetési találat beállított értesítő alapján.`,
     html: `
     <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
     <html xmlns="http://www.w3.org/1999/xhtml" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
@@ -89,14 +88,6 @@ const mailIt = (typeText, price, link, avgPercent, medianPercent, user) => {
                                     <table width="100%" cellpadding="0" cellspacing="0" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
                                         <tr style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
                                             <td class="content-block" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px;" valign="top">Találat: ${typeText} - €${price},-
-                                            </td>
-                                        </tr>
-                                        <tr style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
-                                            <td class="content-block" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px;" valign="top">Az átlag árhoz képest <strong style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">${avgPercent}%</strong>-kal olcsóbban.
-                                            </td>
-                                        </tr>
-                                        <tr style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
-                                            <td class="content-block" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px;" valign="top">A medián árhoz képest <strong style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">${medianPercent}%</strong>-kal olcsóbban.
                                             </td>
                                         </tr>
                                         <tr style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
