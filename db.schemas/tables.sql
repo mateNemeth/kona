@@ -33,17 +33,55 @@ CREATE TABLE average_prices (
     median BIGINT NOT NULL
 );
 
-CREATE TABLE user (
+CREATE TABLE working_queue (
+    id BIGINT NOT NULL PRIMARY KEY,
+    working BOOLEAN DEFAULT FALSE
+);
+
+CREATE TABLE users (
     id SERIAL NOT NULL PRIMARY KEY,
     first_name VARCHAR(50) NOT NULL,
     last_name VARCHAR(50) NOT NULL,
     email VARCHAR(255) NOT NULL,
-    alerts INT NOT NULL,
-    password CHAR(60) NOT NULL
+    password CHAR(60) NOT NULL,
+    cheap_alert INT,
+    specific_alert INT []
 );
 
-CREATE TABLE user_alerts (
-    id SERIAL NOT NULL PRIMARY KEY,
+CREATE TABLE cheap_alerts (
+    id INT NOT NULL PRIMARY KEY,
     zipcodes INT [],
     treshold INT
 );
+
+CREATE TABLE specific_alerts (
+    id BIGSERIAL NOT NULL PRIMARY KEY,
+    zipcodes INT [],
+    make VARCHAR(50),
+    model VARCHAR(50),
+    ageMax INT,
+    ageMin INT,
+    ccmMax INT,
+    ccmMin INT,
+    kmMax INT,
+    kmMin INT,
+    kwMax INT,
+    kwMin INT,
+    fuel VARCHAR(20),
+    transmission VARCHAR(20),
+    priceMax INT,
+    priceMin INT,
+    treshold INT
+);
+
+INSERT INTO users (first_name, last_name, email, password, cheap_alert)
+VALUES ('Vajk', 'Kiskos', 'kiskosvajk@gmail.com', 'asdasdasdasdasdsadsaasdasdasdasdasdsadsaasdasdasdasdasdsadsa', 1);
+
+INSERT INTO users (first_name, last_name, email, password, cheap_alert)
+VALUES ('Mate', 'Nemeth', 'mate.nemeth@outlook.hu', 'asdasdasdasdasdsadsaasdasdasdasdasdsadsaasdasdasdasdasdsadsa', 2);
+
+INSERT INTO cheap_alerts (id, zipcodes, treshold)
+VALUES (1, '{10, 11, 12, 22, 24, 71}', 25);
+
+INSERT INTO cheap_alerts (id, treshold)
+VALUES (2, 25);

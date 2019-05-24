@@ -2,7 +2,6 @@ const axios = require('axios')
 const cheerio = require('cheerio')
 const calculateAll = require('./calculateAvg')
 const db = require('./db')
-const checkIfNeedsMailing = require('./checkifneedsmailing')
 
 
 const findToScrape = async () => {
@@ -53,8 +52,14 @@ const carProcess = async (data, id) => {
 	let make = $("dt:contains('Márka')").next().text().trim();
 	let model = $("dt:contains('Modell')").next().text().trim();
 	let age = Number($(".sc-font-l.cldt-stage-primary-keyfact").eq(4).text().match(numberPattern)[1]);
-	let km = Number($(".sc-font-l.cldt-stage-primary-keyfact").eq(3).text().match(numberPattern).join("")) || 0;
-	let kw = Number($(".sc-font-l.cldt-stage-primary-keyfact").eq(5).text().match(numberPattern)) || 0;
+	let km = () => {
+		let result = $(".sc-font-l.cldt-stage-primary-keyfact").eq(3).text().match(numberPattern)
+		return (result && result.length > 1) ? Number(result.join("")) : 0
+	}
+	let kw = () => {
+		let result = Number($(".sc-font-l.cldt-stage-primary-keyfact").eq(5).text().match(numberPattern))
+		return result ? result : 0
+	} 
 	let fuel = () => {
 		if (lookFor($("dt"), "Üzemanyag").length > 0) {
 			if (lookFor($("dt"), "Üzemanyag").next().text().trim() === "Dízel (Particulate Filter)") {
@@ -96,7 +101,7 @@ const carProcess = async (data, id) => {
 
 	const vehicle = [
 		{ make, model, age },
-		{ id, km, kw, fuel: fuel(), transmission: transmission(), ccm: ccm(), price, city, zipcode }
+		{ id, km: km(), kw: kw(), fuel: fuel(), transmission: transmission(), ccm: ccm(), price, city, zipcode }
 	]
 	return vehicle
 }
@@ -126,17 +131,25 @@ const saveIntoTable = async () => {
 		if (resp) {
 			const spec = resp[1]
 			const type = resp[0]
-			return saveTypeIntoDb(type).then(resp => {
-				let typeId = resp
+			return saveTypeIntoDb(type).then(typeId => {
 				calculateAll(typeId)
 				saveSpecIntoDb(spec, typeId)
-				checkIfNeedsMailing(spec, typeId)
+				saveEntryToWorkingQueue(spec.id)
 			})
 		} else {
 			return
 		}
 	})
 	return result
+}
+
+const saveEntryToWorkingQueue = async (id) => {
+	return await db('working_queue').select().where('id', id).then(rows => {
+		if(rows.length === 0) {
+			return db('working_queue').insert({ id })
+		} 
+		return;
+	})
 }
 	
 const saveSpecIntoDb = async (spec, typeId) => {
