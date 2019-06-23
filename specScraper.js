@@ -27,7 +27,12 @@ const scrapeSingle = async () => {
 			const carDetails = await queryUrl(`${data.platform}${data.url}`, id).then(async (resp) => {
 				return await carProcess(resp.data, id)
 			})
-			return carDetails 
+			if(carDetails === 'error with data') {
+				const errorCar = await db('carlist').where('crawled', false).first().then(row => row.id);
+				return db('carlist').where('id', errorCar).update('crawled', false);
+			} else {
+				return carDetails
+			}
 		} else {
 			return
 		}
@@ -51,7 +56,8 @@ const carProcess = async (data, id) => {
 		
 	let make = $("dt:contains('Márka')").next().text().trim();
 	let model = $("dt:contains('Modell')").next().text().trim();
-	let age = Number($(".sc-font-l.cldt-stage-primary-keyfact").eq(4).text().match(numberPattern)[1]);
+	let ageData = $(".sc-font-l.cldt-stage-primary-keyfact").eq(4).text().match(numberPattern)
+	let age = ageData ? Number(ageData[1]) : null;
 	let km = () => {
 		let result = $(".sc-font-l.cldt-stage-primary-keyfact").eq(3).text().match(numberPattern)
 		return (result && result.length > 1) ? Number(result.join("")) : 0
@@ -104,7 +110,12 @@ const carProcess = async (data, id) => {
 		{ make, model, age },
 		{ id, km: km(), kw: kw(), fuel: fuel(), transmission: transmission(), ccm: ccm(), price, city, zipcode }
 	]
-	return vehicle
+
+	if(vehicle[0].age === null) {
+		return 'error with data'
+	} else {
+		return vehicle
+	}
 }
 	
 const queryUrl = async (url, id) => {
@@ -129,7 +140,7 @@ const ifEntryDoesntExist = async (id) => {
 	
 const saveIntoTable = async () => {
 	const result = await scrapeSingle().then(resp => {
-		if (resp) {
+		if (resp && resp !== 1) {
 			const spec = resp[1]
 			const type = resp[0]
 			return saveTypeIntoDb(type).then(typeId => {
@@ -204,10 +215,10 @@ const saveTypeIntoDb = async (type) => {
 const makeItFireInInterval = async (delay) => {
 	const intoDb = await saveIntoTable()
 	setTimeout(() => {
-		const newTiming = () => (Math.floor(Math.random() * 180000) + 30000)
+		const newTiming = () => (Math.floor(Math.random() * 100) + 100)
 		return makeItFireInInterval(newTiming())
 	}, delay)
 	return intoDb;
 }
 	
-makeItFireInInterval(30000);
+makeItFireInInterval(100);
