@@ -215,10 +215,10 @@ const saveTypeIntoDb = async (type) => {
 const makeItFireInInterval = async (delay) => {
 	const intoDb = await saveIntoTable()
 	setTimeout(() => {
-		const newTiming = () => (Math.floor(Math.random() * 100) + 100)
+		const newTiming = () => (Math.floor(Math.random() * 90000) + 30000)
 		return makeItFireInInterval(newTiming())
 	}, delay)
 	return intoDb;
 }
 	
-makeItFireInInterval(100);
+makeItFireInInterval(30000);
