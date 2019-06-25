@@ -29,7 +29,7 @@ const scrapeSingle = async () => {
 			})
 			if(carDetails === 'error with data') {
 				const errorCar = await db('carlist').where('crawled', false).first().then(row => row.id);
-				return db('carlist').where('id', errorCar).update('crawled', false);
+				return db('carlist').where('id', errorCar).update('crawled', true);
 			} else {
 				return carDetails
 			}
