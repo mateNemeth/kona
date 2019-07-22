@@ -1,4 +1,4 @@
-const API_KEY = '56cab9b3fc207f738c565084ee0c6114-dc5f81da-4ea9eea1';
+const API_KEY = 'key-e194671c8753b3c2e310e8cf4fbc2f1e';
 const DOMAIN = 'mail.matenemeth.hu';
 const HOST = 'api.eu.mailgun.net'
 const mailgun = require('mailgun-js')({apiKey: API_KEY, domain: DOMAIN, host: HOST});

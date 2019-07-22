@@ -111,7 +111,7 @@ const carProcess = async (data, id) => {
 		{ id, km: km(), kw: kw(), fuel: fuel(), transmission: transmission(), ccm: ccm(), price, city, zipcode }
 	]
 
-	if(vehicle[0].age === null) {
+	if(!vehicle[0].age || !vehicle[0].model || !vehicle[0].make) {
 		return 'error with data'
 	} else {
 		return vehicle
