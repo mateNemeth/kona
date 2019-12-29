@@ -5,13 +5,12 @@ const cheapAlertMail = require('./cheapAlertMail');
 const getUsers = async () => {
   return await db('cheap_alerts')
     .join('users', { 'cheap_alerts.id': 'users.cheap_alert' })
-    .select('email', 'treshold', 'zipcodes')
+    .select('email', 'treshold', 'zipcodes', 'maxprice')
     .then(resp => resp);
 };
 
 //SEND DB DATA THROGUH FILTERING FUNCTIONS
 const cheapAlert = async carSpec => {
-  console.log(carSpec);
   const allUsers = await getUsers();
   const users = await applyAllFilter(carSpec, allUsers);
   if (users && users.length) {
