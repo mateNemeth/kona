@@ -4,7 +4,7 @@ const db = require('./db');
 
 const url = 'https://www.autoscout24.hu';
 const queryUrl =
-  '/lst?&desc=1&size=20&page=1&fc=0&cy=A&sort=age&ustate=N%2CU&atype=C';
+  '/lst/?sort=age&desc=1&offer=J%2CU%2CO%2CD&ustate=N%2CU&size=20&page=1&cy=A&atype=C&ac=0&';
 
 const getData = async () => {
   try {
