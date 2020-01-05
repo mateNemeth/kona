@@ -73,7 +73,8 @@ const carProcess = async (data, id) => {
 			} else if (lookFor($("dt"), "Üzemanyag").next().text().trim() === "Benzin (Particulate Filter)" || 
 					   lookFor($("dt"), "Üzemanyag").next().text().trim() === "Super 95" || 
 					   lookFor($("dt"), "Üzemanyag").next().text().trim() === "Super 95 / 91-es normálbenzin" || 
-					   lookFor($("dt"), "Üzemanyag").next().text().trim() === "91-es normálbenzin") {
+						 lookFor($("dt"), "Üzemanyag").next().text().trim() === "91-es normálbenzin" ||
+						 lookFor($("dt"), "Üzemanyag").next().text().trim() === "Super E10 Plus 95-ös / Super 95 (Particulate Filter)") {
 				return "Benzin";
 			} else {
 				return lookFor($("dt"), "Üzemanyag").next().text().trim();
