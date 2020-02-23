@@ -107,8 +107,11 @@ const specAlert = async (carSpec) => {
         const type = await db('cartype').select().where('id', carSpec.cartype).then(row => row[0])
         const fuelType = await db('carspec').select().where('id', carSpec.id).then(row => `${row[0].fuel}`)
         const typeText = `${type.make} ${type.model} - (${type.age}, ${fuelType})`
+        const calculatedPrices = await db('average_prices').select().where('id', carSpec.cartype).then(row=> row[0])
+        const avgPercent = Math.round(100-(carSpec.price/calculatedPrices.avg * 100))
+        const medianPercent = Math.round(100-(carSpec.price/calculatedPrices.median * 100))
         users.map(user => {
-            specAlertMail(typeText, carSpec.price, link, user)
+            specAlertMail(typeText, carSpec.price, link, avgPercent, medianPercent, user)
         })
     }
 }
