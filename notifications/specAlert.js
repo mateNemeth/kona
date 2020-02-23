@@ -24,39 +24,39 @@ const checkAlert = async (carSpec, alerts) => {
                 ? alert.zipcodes.indexOf(zip) !== -1 
                 : true)
             && (alert.agemax
-                ? alert.agemax > carSpec.age 
+                ? alert.agemax >= carSpec.age 
                 : true)
             && (alert.agemin
-                ? alert.agemin < carSpec.age 
+                ? alert.agemin <= carSpec.age 
                 : true)
             && (alert.ccmmax
                 ? carSpec.ccm 
-                    ? alert.ccmmax > carSpec.ccm
+                    ? alert.ccmmax >= carSpec.ccm
                     : false 
                 : true)            
             && (alert.ccmmin
                 ? carSpec.ccm
-                    ? alert.ccmmin < carSpec.ccm
+                    ? alert.ccmmin <= carSpec.ccm
                     : false
                 : true)
             && (alert.kmmax
                 ? carSpec.km
-                    ? alert.kmmax > carSpec.km
+                    ? alert.kmmax >= carSpec.km
                     : false
                 : true)
             && (alert.kmmin
                 ? carSpec.km
-                    ? alert.kmmin < carSpec.km
+                    ? alert.kmmin <= carSpec.km
                     : false
                 : true)
             && (alert.kwmax
                 ? carSpec.kw
-                    ? alert.kwmax > carSpec.kw
+                    ? alert.kwmax >= carSpec.kw
                     : false
                 : true)
             && (alert.kwmin 
                 ? carSpec.kw
-                    ? alert.kwmin < carSpec.kw
+                    ? alert.kwmin <= carSpec.kw
                     : false
                 : true)
             && (alert.fuel
@@ -71,12 +71,12 @@ const checkAlert = async (carSpec, alerts) => {
                 : true)
             && (alert.pricemax
                 ? carSpec.price
-                    ? alert.pricemax > carSpec.price
+                    ? alert.pricemax >= carSpec.price
                     : false
                 : true)
             && (alert.pricemin
                 ? carSpec.price
-                    ? alert.pricemin < carSpec.price
+                    ? alert.pricemin <= carSpec.price
                     : false
                 : true)
             && (alert.make
