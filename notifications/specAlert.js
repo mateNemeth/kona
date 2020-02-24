@@ -106,7 +106,7 @@ const checkAlert = async (carSpec, alerts, avgPercent, medianPercent) => {
 const specAlert = async carSpec => {
   const alerts = await getAlerts();
   const users = await checkAlert(carSpec, alerts, avgPrice);
-  const {avgPercent, medianPercent} = await getAvgPrices(carSpec.cartype);
+  const { avgPercent, medianPercent } = await getAvgPrices(carSpec.cartype);
   const usersToAlert = applyAllFilter(carSpec, users, avgPercent, medianPercent);
   if (users && users.length) {
     const link = await db('carlist')
