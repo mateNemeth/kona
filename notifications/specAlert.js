@@ -19,7 +19,21 @@ const getAlerts = async () => {
     });
 };
 
-const checkAlert = async (carSpec, alerts) => {
+const getAvgPrices = async (carType) => {
+  const calculatedPrices = await db('average_prices')
+      .select()
+      .where('id', carType)
+      .then(row => row[0]);
+  const avgPercent = Math.round(
+    100 - (carSpec.price / calculatedPrices.avg) * 100
+  );
+  const medianPercent = Math.round(
+    100 - (carSpec.price / calculatedPrices.median) * 100
+  ); 
+  return { avgPercent, medianPercent }
+};
+
+const checkAlert = async (carSpec, alerts, avgPercent, medianPercent) => {
   const zip = Number(carSpec.zipcode.toString().slice(0, 2));
   const result = alerts.filter(alert => {
     if (
@@ -70,6 +84,10 @@ const checkAlert = async (carSpec, alerts) => {
           ? carSpec.model.includes(alert.model)
           : false
         : true)
+      (alert.treshold
+        ? (avgPercent || medianPercent) > alert.treshold
+        : true
+      )
     ) {
       return alert;
     }
@@ -87,8 +105,9 @@ const checkAlert = async (carSpec, alerts) => {
 
 const specAlert = async carSpec => {
   const alerts = await getAlerts();
-  const users = await checkAlert(carSpec, alerts);
-  const usersToAlert = applyAllFilter(carSpec, users);
+  const users = await checkAlert(carSpec, alerts, avgPrice);
+  const {avgPercent, medianPercent} = await getAvgPrices(carSpec.cartype);
+  const usersToAlert = applyAllFilter(carSpec, users, avgPercent, medianPercent);
   if (users && users.length) {
     const link = await db('carlist')
       .select()
@@ -103,16 +122,6 @@ const specAlert = async carSpec => {
       .where('id', carSpec.id)
       .then(row => `${row[0].fuel}`);
     const typeText = `${type.make} ${type.model} - (${type.age}, ${fuelType})`;
-    const calculatedPrices = await db('average_prices')
-      .select()
-      .where('id', carSpec.cartype)
-      .then(row => row[0]);
-    const avgPercent = Math.round(
-      100 - (carSpec.price / calculatedPrices.avg) * 100
-    );
-    const medianPercent = Math.round(
-      100 - (carSpec.price / calculatedPrices.median) * 100
-    );
     usersToAlert.map(user => {
       specAlertMail(
         typeText,
