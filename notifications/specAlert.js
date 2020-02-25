@@ -38,7 +38,7 @@ const getAvgPrices = async carType => {
   }
 };
 
-const checkAlert = async (carSpec, alerts, avgPercent, medianPercent) => {
+const checkAlert = async (carSpec, alerts) => {
   const zip = Number(carSpec.zipcode.toString().slice(0, 2));
   const result = alerts.filter(alert => {
     if (
@@ -93,6 +93,7 @@ const checkAlert = async (carSpec, alerts, avgPercent, medianPercent) => {
       return alert;
     }
   });
+  console.log('checkAlert/result: ', result);
   const toNotify = await Promise.all(
     result.map(async item => {
       return await db('users')
@@ -108,7 +109,7 @@ const specAlert = async carSpec => {
   const alerts = await getAlerts();
   const users = await checkAlert(carSpec, alerts, avgPrice);
   const { avg, median } = await getAvgPrices(carSpec.cartype);
-  const usersToAlert = await applyAllFilter(carSpec, users);
+  console.log('specAlert/users: ', users);
   if (users && users.length) {
     const link = await db('carlist')
       .select()
@@ -123,21 +124,9 @@ const specAlert = async carSpec => {
       .where('id', carSpec.id)
       .then(row => `${row[0].fuel}`);
     const typeText = `${type.make} ${type.model} - (${type.age}, ${fuelType})`;
-    usersToAlert.map(user => {
+    users.map(user => {
       specAlertMail(typeText, carSpec.price, link, avg, median, user);
     });
-  }
-};
-
-const applyAllFilter = async (carSpec, users) => {
-  const filteredUsers = await filterByZip(carSpec.zipcode, users);
-  if (!filteredUsers) {
-    return null;
-  } else {
-    const toAlert = filteredUsers.map(user => {
-      toAlert.push(user);
-    });
-    return toAlert;
   }
 };
 
