@@ -19,18 +19,20 @@ const getAlerts = async () => {
     });
 };
 
-const getAvgPrices = async (carType) => {
-  const calculatedPrices = await db('average_prices')
-      .select()
-      .where('id', carType)
-      .then(row => row[0]);
-  const avgPercent = Math.round(
-    100 - (carSpec.price / calculatedPrices.avg) * 100
-  );
-  const medianPercent = Math.round(
-    100 - (carSpec.price / calculatedPrices.median) * 100
-  ); 
-  return { avgPercent, medianPercent }
+const getAvgPrices = async carType => {
+  const vehiclePriceStats = await db('average_prices')
+    .select()
+    .where('id', carSpec.cartype)
+    .then(row => {
+      if (row) {
+        return row[0];
+      } else {
+        return null;
+      }
+    });
+
+  const { avg, median } = vehiclePriceStats;
+  return { avg, median };
 };
 
 const checkAlert = async (carSpec, alerts, avgPercent, medianPercent) => {
@@ -84,10 +86,6 @@ const checkAlert = async (carSpec, alerts, avgPercent, medianPercent) => {
           ? carSpec.model.includes(alert.model)
           : false
         : true)
-      (alert.treshold
-        ? (avgPercent || medianPercent) > alert.treshold
-        : true
-      )
     ) {
       return alert;
     }
@@ -106,8 +104,8 @@ const checkAlert = async (carSpec, alerts, avgPercent, medianPercent) => {
 const specAlert = async carSpec => {
   const alerts = await getAlerts();
   const users = await checkAlert(carSpec, alerts, avgPrice);
-  const { avgPercent, medianPercent } = await getAvgPrices(carSpec.cartype);
-  const usersToAlert = applyAllFilter(carSpec, users, avgPercent, medianPercent);
+  const { avg, median } = await getAvgPrices(carSpec.cartype);
+  const usersToAlert = await applyAllFilter(carSpec, users);
   if (users && users.length) {
     const link = await db('carlist')
       .select()
@@ -123,14 +121,7 @@ const specAlert = async carSpec => {
       .then(row => `${row[0].fuel}`);
     const typeText = `${type.make} ${type.model} - (${type.age}, ${fuelType})`;
     usersToAlert.map(user => {
-      specAlertMail(
-        typeText,
-        carSpec.price,
-        link,
-        avgPercent,
-        medianPercent,
-        user
-      );
+      specAlertMail(typeText, carSpec.price, link, avg, median, user);
     });
   }
 };
@@ -140,33 +131,10 @@ const applyAllFilter = async (carSpec, users) => {
   if (!filteredUsers) {
     return null;
   } else {
-    const vehiclePriceStats = await db('average_prices')
-      .select()
-      .where('id', carSpec.cartype)
-      .then(row => {
-        if (row) {
-          return row[0];
-        } else {
-          return null;
-        }
-      });
-    if (vehiclePriceStats) {
-      const toAlert = [];
-      filteredUsers.map(user => {
-        const treshold = (100 - user.treshold) / 100;
-        const { price } = carSpec;
-        const { avg, median } = vehiclePriceStats;
-        if (
-          (price < avg * treshold || price < median * treshold) &&
-          price <= user.maxprice
-        ) {
-          toAlert.push(user);
-        } else {
-          return;
-        }
-      });
-      return toAlert;
-    }
+    const toAlert = filteredUsers.map(user => {
+      toAlert.push(user);
+    });
+    return toAlert;
   }
 };
 
