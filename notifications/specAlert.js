@@ -22,7 +22,7 @@ const getAlerts = async () => {
 const getAvgPrices = async carType => {
   const vehiclePriceStats = await db('average_prices')
     .select()
-    .where('id', carSpec.cartype)
+    .where('id', carType)
     .then(row => {
       if (row) {
         return row[0];
@@ -30,9 +30,12 @@ const getAvgPrices = async carType => {
         return null;
       }
     });
-
-  const { avg, median } = vehiclePriceStats;
-  return { avg, median };
+  
+  if (vehiclePriceStats) {
+    return { avg, median } = vehiclePriceStats;
+  } else {
+    return { avg: 'Nincs adat', median: 'Nincs adat'}
+  }
 };
 
 const checkAlert = async (carSpec, alerts, avgPercent, medianPercent) => {
