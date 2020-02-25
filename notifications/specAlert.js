@@ -107,7 +107,7 @@ const checkAlert = async (carSpec, alerts) => {
 
 const specAlert = async carSpec => {
   const alerts = await getAlerts();
-  const users = await checkAlert(carSpec, alerts, avgPrice);
+  const users = await checkAlert(carSpec, alerts);
   const { avg, median } = await getAvgPrices(carSpec.cartype);
   console.log('specAlert/users: ', users);
   if (users && users.length) {
