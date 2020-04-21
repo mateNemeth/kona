@@ -1,7 +1,4 @@
-const API_KEY = 'key-e194671c8753b3c2e310e8cf4fbc2f1e';
-const DOMAIN = 'mail.matenemeth.hu';
-const HOST = 'api.eu.mailgun.net'
-const mailgun = require('mailgun-js')({apiKey: API_KEY, domain: DOMAIN, host: HOST});
+const mailgun = require('mailgun-js')({apiKey: process.env.REACT_APP_API_KEY, domain: process.env.REACT_APP_DOMAIN, host: process.env.REACT_APP_HOST});
 
 
 const mailIt = (typeText, price, link, avgPercent, medianPercent, user) => {
