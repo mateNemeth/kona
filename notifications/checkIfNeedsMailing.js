@@ -8,7 +8,6 @@ const checkIfNeedsMailing = async () => {
   } else {
     removeFromQueue(carSpec.id);
     specAlert(carSpec);
-    cheapAlert(carSpec);
 
     return (minutes = 0.16);
   }
