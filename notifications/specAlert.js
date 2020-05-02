@@ -124,7 +124,6 @@ const specAlert = async (carSpec) => {
       .where('id', carSpec.id)
       .then((row) => `${row[0].fuel}`);
     const typeText = `${type.make} ${type.model} - (${type.age}, ${fuelType})`;
-    users.push('mate.nemeth@outlook.hu');
     users.map((user) => {
       mailIt(typeText, carSpec.price, link, avg, median, user);
     });
