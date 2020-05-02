@@ -4,9 +4,9 @@ const specAlertMail = require('./specAlertMail');
 const getAlerts = async () => {
   return await db('specific_alerts')
     .select()
-    .then(async resp => {
+    .then(async (resp) => {
       const keys = Object.keys(resp[0]);
-      const values = resp.map(row => {
+      const values = resp.map((row) => {
         let filter = {};
         for (let i = 0; i < keys.length; i++) {
           if (row[keys[i]]) {
@@ -19,28 +19,28 @@ const getAlerts = async () => {
     });
 };
 
-const getAvgPrices = async carType => {
+const getAvgPrices = async (carType) => {
   const vehiclePriceStats = await db('average_prices')
     .select()
     .where('id', carType)
-    .then(row => {
+    .then((row) => {
       if (row) {
         return row[0];
       } else {
         return null;
       }
     });
-  
+
   if (vehiclePriceStats) {
-    return { avg, median } = vehiclePriceStats;
+    return ({ avg, median } = vehiclePriceStats);
   } else {
-    return { avg: 'Nincs adat', median: 'Nincs adat'}
+    return { avg: 'Nincs adat', median: 'Nincs adat' };
   }
 };
 
 const checkAlert = async (carSpec, alerts) => {
   const zip = Number(carSpec.zipcode.toString().slice(0, 2));
-  const result = alerts.filter(alert => {
+  const result = alerts.filter((alert) => {
     if (
       (alert.zipcodes ? alert.zipcodes.indexOf(zip) !== -1 : true) &&
       (alert.agemax ? alert.agemax >= carSpec.age : true) &&
@@ -95,17 +95,17 @@ const checkAlert = async (carSpec, alerts) => {
   });
   console.log('checkAlert/result: ', result);
   const toNotify = await Promise.all(
-    result.map(async item => {
+    result.map(async (item) => {
       return await db('users')
         .select('email')
         .whereRaw(`${item.id}=ANY(specific_alert)`)
-        .then(resp => resp[0].email);
+        .then((resp) => resp[0].email);
     })
   );
   return toNotify;
 };
 
-const specAlert = async carSpec => {
+const specAlert = async (carSpec) => {
   const alerts = await getAlerts();
   const users = await checkAlert(carSpec, alerts);
   const { avg, median } = await getAvgPrices(carSpec.cartype);
@@ -114,17 +114,18 @@ const specAlert = async carSpec => {
     const link = await db('carlist')
       .select()
       .where('id', carSpec.id)
-      .then(row => `${row[0].platform}${row[0].link}`);
+      .then((row) => `${row[0].platform}${row[0].link}`);
     const type = await db('cartype')
       .select()
       .where('id', carSpec.cartype)
-      .then(row => row[0]);
+      .then((row) => row[0]);
     const fuelType = await db('carspec')
       .select()
       .where('id', carSpec.id)
-      .then(row => `${row[0].fuel}`);
+      .then((row) => `${row[0].fuel}`);
     const typeText = `${type.make} ${type.model} - (${type.age}, ${fuelType})`;
-    users.map(user => {
+    users.push('mate.nemeth@outlook.hu');
+    users.map((user) => {
       specAlertMail(typeText, carSpec.price, link, avg, median, user);
     });
   }
