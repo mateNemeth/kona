@@ -1,5 +1,6 @@
 const db = require('../db');
 const specAlert = require('./specAlert');
+require('dotenv').config();
 
 const checkIfNeedsMailing = async () => {
   const carSpec = await findWork();
