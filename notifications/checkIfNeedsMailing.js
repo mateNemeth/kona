@@ -58,5 +58,6 @@ let minutes = 0.16,
   the_interval = minutes * 60 * 1000;
 
 setInterval(() => {
+  console.log(minutes);
   checkIfNeedsMailing();
 }, the_interval);

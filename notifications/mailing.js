@@ -36,6 +36,9 @@ const mailIt = async (typeText, price, link, avg, median, user) => {
 
     console.log(response.config.data);
   } catch (error) {
+    let date = new Date().toISOString().slice(0, 10);
+    let time = new Date().toISOString().slice(11, 19);
+    console.error(`${date} ${time}: ${error.message}`);
     console.error(error);
   }
 };
