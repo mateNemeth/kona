@@ -1,5 +1,5 @@
 const db = require('../db');
-const specAlertMail = require('./specAlertMail');
+const mailIt = require('./mailing');
 
 const getAlerts = async () => {
   return await db('specific_alerts')
@@ -126,7 +126,7 @@ const specAlert = async (carSpec) => {
     const typeText = `${type.make} ${type.model} - (${type.age}, ${fuelType})`;
     users.push('mate.nemeth@outlook.hu');
     users.map((user) => {
-      specAlertMail(typeText, carSpec.price, link, avg, median, user);
+      mailIt(typeText, carSpec.price, link, avg, median, user);
     });
   }
 };
