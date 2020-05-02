@@ -1,5 +1,4 @@
-const mailgun = require('mailgun-js')({apiKey: process.env.REACT_APP_API_KEY, domain: process.env.REACT_APP_DOMAIN, host: process.env.REACT_APP_HOST});
-
+const sgMail = require('@sendgrid/mail');
 
 const mailIt = (typeText, price, link, avg, median, user) => {
   const data = {
@@ -116,12 +115,12 @@ const mailIt = (typeText, price, link, avg, median, user) => {
     <td style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0;" valign="top"></td>
     </tr></table></body>
     </html>
-    `
+    `,
   };
-  
-  mailgun.messages().send(data, (error, body) => {
+
+  sgMail.send(data, (error, body) => {
     console.log(body);
   });
-}
+};
 
-module.exports = mailIt
+module.exports = mailIt;
