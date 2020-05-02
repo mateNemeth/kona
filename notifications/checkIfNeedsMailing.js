@@ -1,5 +1,4 @@
 const db = require('../db');
-const cheapAlert = require('./cheapAlert');
 const specAlert = require('./specAlert');
 
 const checkIfNeedsMailing = async () => {
