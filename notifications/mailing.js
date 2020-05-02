@@ -23,8 +23,8 @@ const mailIt = async (typeText, price, link, avg, median, user) => {
         },
       },
     ],
-    from: { email: 'no-reply@mail.matenemeth.hu', name: 'Car Alert' },
-    reply_to: { email: 'no-reply@matenemeth.hu', name: 'Car Alert' },
+    from: { email: process.env.FROM_EMAIL, name: 'Car Alert' },
+    reply_to: { email: process.env.REPLY_EMAIL, name: 'Car Alert' },
     template_id: 'd-1dbea2f8c47b4bbb8f7cc31f515f1d6c',
   };
 
