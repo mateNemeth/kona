@@ -73,15 +73,3 @@ CREATE TABLE specific_alerts (
     priceMin INT,
     treshold INT
 );
-
-INSERT INTO users (first_name, last_name, email, password, cheap_alert)
-VALUES ('Vajk', 'Kiskos', 'kiskosvajk@gmail.com', 'asdasdasdasdasdsadsaasdasdasdasdasdsadsaasdasdasdasdasdsadsa', 1);
-
-INSERT INTO users (first_name, last_name, email, password, cheap_alert)
-VALUES ('Mate', 'Nemeth', 'mate.nemeth@outlook.hu', 'asdasdasdasdasdsadsaasdasdasdasdasdsadsaasdasdasdasdasdsadsa', 2);
-
-INSERT INTO cheap_alerts (id, zipcodes, treshold)
-VALUES (1, '{10, 11, 12, 22, 24, 71}', 25);
-
-INSERT INTO cheap_alerts (id, treshold)
-VALUES (2, 25);
