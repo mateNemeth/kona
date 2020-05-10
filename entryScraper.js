@@ -10,10 +10,11 @@ const queryUrl =
 
 const getData = async () => {
   try {
-    logger('info', 'Looking for new entries.', 'entryScaper/queryUrl');
-    return await axios.get(`${url}${queryUrl}`);
+    logger('info', 'Looking for new entries.');
+    const response = await axios.get(`${url}${queryUrl}`);
+    return response.data;
   } catch (error) {
-    logger('error', error.message, 'entryScaper/queryUrl');
+    logger('error', error.message);
   }
 };
 
@@ -38,36 +39,23 @@ const processData = async () => {
       data.push(vehicle);
     });
 
-    logger(
-      'info',
-      `Found entries: ${JSON.stringify(data)}`,
-      'entryScraper/processData'
-    );
+    logger('info', `Found entries: ${JSON.stringify(data)}`);
     return data;
   } catch (error) {
-    logger('error', error.message, 'entryScaper/processData');
+    logger('error', error.message);
   }
 };
 
 const scrapeNew = async () => {
   try {
     const result = await processData();
-    logger(
-      'info',
-      'Saving entries into CARLIST table.',
-      'entryScraper/scrapeNew'
-    );
     result.map((item) => {
-      logger(
-        'info',
-        `Logging for bugfix: ${JSON.stringify(item)}`,
-        'entryScraper/scrapeNew'
-      );
       return db('carlist')
         .select()
         .where('platform_id', item.scoutId)
         .then((rows) => {
           if (rows.length === 0) {
+            logger('info', `Saving entry into db: ${JSON.stringify(item)}`);
             return db('carlist').insert({
               platform: item.platform,
               platform_id: item.scoutId,
@@ -75,12 +63,13 @@ const scrapeNew = async () => {
               crawled: false,
             });
           } else {
+            logger('info', `Entry is already in db: ${JSON.stringify(item)}`);
             return;
           }
         });
     });
   } catch (error) {
-    logger('error', error.message, 'entryScaper/scrapeNew');
+    logger('error', error.message);
   }
 
   let minutes = 10;

@@ -3,11 +3,7 @@ const logger = require('./logger/logger');
 
 const getPricesFromDb = async (typeId) => {
   try {
-    logger(
-      'info',
-      `Calculating average prices for ${JSON.stringify(typeId)}`,
-      'calculateAvg/getPricesFromDb'
-    );
+    logger('info', `Calculating average prices for ${JSON.stringify(typeId)}`);
     const carType = await db('cartype')
       .select()
       .where('id', typeId)
@@ -42,7 +38,7 @@ const getPricesFromDb = async (typeId) => {
         }
       });
   } catch (error) {
-    logger('error', error.stack, 'calculateAvg/getPricesFromDb');
+    logger('error', error.stack);
   }
 };
 
@@ -54,17 +50,14 @@ const calculateAverage = async (typeId) => {
           prices.reduce((prev, curr) => prev + curr) / prices.length
         );
 
-        logger(
-          'info'`New average for ${typeId} is ${newAvg},-.`,
-          'calculateAvg/calculateAverage'
-        );
+        logger('info'`New average for ${typeId} is ${newAvg},-.`);
         return newAvg;
       } else {
         return;
       }
     });
   } catch (error) {
-    logger('error', error.stack, 'calculateAvg/calculateAverage');
+    logger('error', error.stack);
   }
 };
 
@@ -83,18 +76,14 @@ const calculateMedian = async (typeId) => {
 
         newMedian = Math.round(sorted[middle]);
 
-        logger(
-          'info',
-          `New median for ${typeId} is ${newMedian}.`,
-          'calculateAvg/calculateMedian'
-        );
+        logger('info', `New median for ${typeId} is ${newMedian}.`);
         return newMedian;
       } else {
         return;
       }
     });
   } catch (error) {
-    logger('error', error.stack, 'calculateAvg/calculateMedian');
+    logger('error', error.stack);
   }
 };
 
@@ -110,22 +99,14 @@ const calculateAll = async (typeId) => {
         .where('id', typeId)
         .then((rows) => {
           if (rows.length === 0) {
-            logger(
-              'info',
-              'Saving avg & median prices into db.',
-              'calculateAvg/calculateAll'
-            );
+            logger('info', 'Saving avg & median prices into db.');
             return db('average_prices').insert({
               id: typeId,
               avg: average,
               median: median,
             });
           } else {
-            logger(
-              'info',
-              'Updating avg & median prices into db.',
-              'calculateAvg/calculateAll'
-            );
+            logger('info', 'Updating avg & median prices into db.');
             return db('average_prices').where('id', rows[0].id).update({
               id: typeId,
               avg: average,
@@ -134,15 +115,11 @@ const calculateAll = async (typeId) => {
           }
         });
     } else {
-      logger(
-        'info',
-        'Not enough data to calculate prices.',
-        'calculateAvg/calculateAll'
-      );
+      logger('info', 'Not enough data to calculate prices.');
       return false;
     }
   } catch (error) {
-    logger('error', error.stack, 'calculateAvg/calculateAll');
+    logger('error', error.stack);
   }
 };
 
