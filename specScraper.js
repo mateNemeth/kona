@@ -3,6 +3,7 @@ const cheerio = require('cheerio');
 const calculateAll = require('./calculateAvg');
 const db = require('./db');
 const logger = require('./logger/logger');
+const utils = require('./utils');
 
 const findToScrape = async () => {
   try {
@@ -231,33 +232,6 @@ const ifEntryDoesntExist = async (id) => {
   }
 };
 
-const saveIntoTable = async () => {
-  try {
-    const result = await scrapeSingle().then((resp) => {
-      if (resp && resp !== 1) {
-        logger(
-          'info',
-          `Saving data to db: ${JSON.stringify(resp)}`,
-          'specScraper/saveIntoTable'
-        );
-        const spec = resp[1];
-        const type = resp[0];
-        return saveTypeIntoDb(type).then((typeId) => {
-          calculateAll(typeId);
-          saveSpecIntoDb(spec, typeId);
-          saveEntryToWorkingQueue(spec.id);
-        });
-      } else {
-        return;
-      }
-    });
-
-    return result;
-  } catch (error) {
-    logger('error', error.stack, 'specScraper/saveIntoDb');
-  }
-};
-
 const saveEntryToWorkingQueue = async (id) => {
   try {
     return await db('working_queue')
@@ -357,13 +331,46 @@ const saveTypeIntoDb = async (type) => {
   }
 };
 
-const makeItFireInInterval = async (delay) => {
-  const intoDb = await saveIntoTable();
-  setTimeout(() => {
-    const newTiming = () => Math.floor(Math.random() * 90000) + 30000;
-    return makeItFireInInterval(newTiming());
-  }, delay);
-  return intoDb;
+const saveIntoTable = async () => {
+  try {
+    const result = await scrapeSingle().then(async (resp) => {
+      if (resp && resp !== 1) {
+        logger(
+          'info',
+          `Saving data to db: ${JSON.stringify(resp)}`,
+          'specScraper/saveIntoTable'
+        );
+        const spec = resp[1];
+        const type = resp[0];
+        await saveTypeIntoDb(type).then((typeId) => {
+          calculateAll(typeId);
+          saveSpecIntoDb(spec, typeId);
+          saveEntryToWorkingQueue(spec.id);
+        });
+
+        let minutes = Math.floor(Math.random() * 2) + 0.5;
+        let sleepTime = minutes * 60 * 1000;
+
+        await utils.sleep(sleepTime);
+        saveIntoTable();
+      } else {
+        let minutes = 5;
+        let sleepTime = minutes * 60 * 1000;
+
+        logger(
+          'info',
+          `No entry found to scrape, sleeping for ${minutes} minutes.`,
+          'specScraper/saveIntoTable'
+        );
+        await utils.sleep(sleepTime);
+        saveIntoTable();
+      }
+    });
+
+    return result;
+  } catch (error) {
+    logger('error', error.stack, 'specScraper/saveIntoDb');
+  }
 };
 
-makeItFireInInterval(30000);
+saveIntoTable();

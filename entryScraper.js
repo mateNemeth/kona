@@ -2,6 +2,7 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 const db = require('./db');
 const logger = require('./logger/logger');
+const utils = require('./utils');
 
 const url = 'https://www.autoscout24.hu';
 const queryUrl =
@@ -9,7 +10,7 @@ const queryUrl =
 
 const getData = async () => {
   try {
-    logger('info', 'Looking from new entries.', 'entryScaper/queryUrl');
+    logger('info', 'Looking for new entries.', 'entryScaper/queryUrl');
     return await axios.get(`${url}${queryUrl}`);
   } catch (error) {
     logger('error', error.message, 'entryScaper/queryUrl');
@@ -18,12 +19,12 @@ const getData = async () => {
 
 const processData = async () => {
   try {
+    let $ = cheerio.load(await getData());
     logger(
       'info',
       'Collecting entries from main page.',
       'entryScaper/processData'
     );
-    let $ = cheerio.load(await getData());
     const data = [];
     $('.cldt-summary-full-item').each((index, element) => {
       let platform = 'https://autoscout24.hu';
@@ -49,12 +50,12 @@ const processData = async () => {
 
 const scrapeNew = async () => {
   try {
+    const result = await processData();
     logger(
       'info',
       'Saving entries into CARLIST table.',
       'entryScraper/scrapeNew'
     );
-    const result = await processData();
     result.map((item) => {
       return db('carlist')
         .select()
@@ -75,11 +76,11 @@ const scrapeNew = async () => {
   } catch (error) {
     logger('error', error.message, 'entryScaper/scrapeNew');
   }
+
+  let minutes = 10;
+  let sleepTime = minutes * 60 * 1000;
+  await utils.sleep(sleepTime);
+  scrapeNew();
 };
 
-const minutes = 10,
-  the_interval = minutes * 60 * 1000;
-
-setInterval(() => {
-  scrapeNew();
-}, the_interval);
+scrapeNew();
