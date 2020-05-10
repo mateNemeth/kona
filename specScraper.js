@@ -199,7 +199,7 @@ const queryUrl = async (url, id) => {
       logger('info', 'Advert does not exist anymore.');
       return await ifEntryDoesntExist(id).then((response) => {
         if (response) {
-          saveIntoTable();
+          return saveIntoTable();
         }
       });
     }
