@@ -333,7 +333,7 @@ const saveTypeIntoDb = async (type) => {
 
 const saveIntoTable = async () => {
   try {
-    const result = await scrapeSingle().then((resp) => {
+    const result = await scrapeSingle().then(async (resp) => {
       if (resp && resp !== 1) {
         logger(
           'info',
@@ -346,20 +346,24 @@ const saveIntoTable = async () => {
           calculateAll(typeId);
           saveSpecIntoDb(spec, typeId);
           saveEntryToWorkingQueue(spec.id);
-				});
-				
-				let minutes = Math.floor(Math.random() * 2) + 0.5;
-				let sleepTime = minutes * 60 * 1000;
+        });
 
-				await utils.sleep(sleepTime);
-				saveIntoTable();
+        let minutes = Math.floor(Math.random() * 2) + 0.5;
+        let sleepTime = minutes * 60 * 1000;
+
+        await utils.sleep(sleepTime);
+        saveIntoTable();
       } else {
-				let minutes = 5;
-				let sleepTime = minutes * 60 * 1000;
+        let minutes = 5;
+        let sleepTime = minutes * 60 * 1000;
 
-				logger('info', `No entry found to scrape, sleeping for ${minutes} minutes.`, 'specScraper/saveIntoTable');
-				await utils.sleep(sleepTime);
-				saveIntoTable();
+        logger(
+          'info',
+          `No entry found to scrape, sleeping for ${minutes} minutes.`,
+          'specScraper/saveIntoTable'
+        );
+        await utils.sleep(sleepTime);
+        saveIntoTable();
       }
     });
 
