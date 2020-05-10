@@ -50,7 +50,7 @@ const calculateAverage = async (typeId) => {
           prices.reduce((prev, curr) => prev + curr) / prices.length
         );
 
-        logger('info'`New average for ${typeId} is ${newAvg},-.`);
+        logger('info', `New average for ${typeId} is ${newAvg},-.`);
         return newAvg;
       } else {
         return;
