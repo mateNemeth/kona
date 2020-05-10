@@ -27,7 +27,7 @@ const getAlerts = async () => {
 
 const getAvgPrices = async (carType) => {
   try {
-    logger('info', `Getting average/median prices for cartype: ${carType}.`);
+    logger('info', `Getting average/median prices for cartype: [${carType}].`);
     const vehiclePriceStats = await db('average_prices')
       .select()
       .where('id', carType)
