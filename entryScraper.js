@@ -36,12 +36,10 @@ const processData = async () => {
         scoutId,
         link,
       };
-      console.log(vehicle);
 
       data.push(vehicle);
     });
 
-    logger('info', `Found entries: ${JSON.stringify(data)}`);
     return data;
   } catch (error) {
     logger('error', error.message);
