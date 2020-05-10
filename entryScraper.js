@@ -20,7 +20,8 @@ const getData = async () => {
 
 const processData = async () => {
   try {
-    let $ = cheerio.load(await getData());
+    const raw = await getData();
+    let $ = cheerio.load(raw);
     const data = [];
     $('.cldt-summary-full-item').each((index, element) => {
       let platform = 'https://autoscout24.hu';
@@ -35,6 +36,7 @@ const processData = async () => {
         scoutId,
         link,
       };
+      console.log(vehicle);
 
       data.push(vehicle);
     });
