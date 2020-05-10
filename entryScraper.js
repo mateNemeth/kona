@@ -10,21 +10,18 @@ const queryUrl =
 
 const getData = async () => {
   try {
-    logger('info', 'Looking for new entries.', 'entryScaper/queryUrl');
-    return await axios.get(`${url}${queryUrl}`);
+    logger('info', 'Looking for new entries.');
+    const response = await axios.get(`${url}${queryUrl}`);
+    return response.data;
   } catch (error) {
-    logger('error', error.message, 'entryScaper/queryUrl');
+    logger('error', error.message);
   }
 };
 
 const processData = async () => {
   try {
-    let $ = cheerio.load(await getData());
-    logger(
-      'info',
-      'Collecting entries from main page.',
-      'entryScaper/processData'
-    );
+    const raw = await getData();
+    let $ = cheerio.load(raw);
     const data = [];
     $('.cldt-summary-full-item').each((index, element) => {
       let platform = 'https://autoscout24.hu';
@@ -42,26 +39,23 @@ const processData = async () => {
 
       data.push(vehicle);
     });
+
     return data;
   } catch (error) {
-    logger('error', error.message, 'entryScaper/processData');
+    logger('error', error.message);
   }
 };
 
 const scrapeNew = async () => {
   try {
     const result = await processData();
-    logger(
-      'info',
-      'Saving entries into CARLIST table.',
-      'entryScraper/scrapeNew'
-    );
     result.map((item) => {
       return db('carlist')
         .select()
         .where('platform_id', item.scoutId)
         .then((rows) => {
           if (rows.length === 0) {
+            logger('info', `Saving entry into db: ${JSON.stringify(item)}`);
             return db('carlist').insert({
               platform: item.platform,
               platform_id: item.scoutId,
@@ -74,7 +68,7 @@ const scrapeNew = async () => {
         });
     });
   } catch (error) {
-    logger('error', error.message, 'entryScaper/scrapeNew');
+    logger('error', error.message);
   }
 
   let minutes = 10;

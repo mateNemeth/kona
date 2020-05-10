@@ -9,11 +9,7 @@ const checkIfNeedsMailing = async () => {
     const carSpec = await findWork();
     let sleepTime;
     if (!carSpec) {
-      logger(
-        'info',
-        'No work found, sleeping for 10 mins.',
-        'checkIfNeedsMailing/checkIfNeedsMailing'
-      );
+      logger('info', 'No work found, sleeping for 10 mins.');
 
       let minutes = 10;
       sleepTime = minutes * 60 * 1000;
@@ -28,20 +24,16 @@ const checkIfNeedsMailing = async () => {
     await utils.sleep(sleepTime);
     checkIfNeedsMailing();
   } catch (error) {
-    logger('error', error.stack, 'checkIfNeedsMailing/checkIfNeedsMailing');
+    logger('error', error.stack);
   }
 };
 
 const removeFromQueue = async (id) => {
   try {
-    logger(
-      'info',
-      `Deleting finished work (id: ${id}) from table.`,
-      'checkIfNeedsMailing/removeFromQueue'
-    );
+    logger('info', `Deleting finished work (id: ${id}) from table.`);
     return await db('working_queue').where('id', id).del();
   } catch (error) {
-    logger('error', error.stack, 'checkIfNeedsMailing/removeFromQueue');
+    logger('error', error.stack);
   }
 };
 
@@ -49,25 +41,17 @@ const findWork = async () => {
   try {
     const work = await db('working_queue').where('working', false).first();
     if (work) {
-      logger(
-        'info',
-        `Found work: ${JSON.stringify(row)}`,
-        'checkIfNeedsMailing/findWork'
-      );
-      const id = db('working_queue')
-        .where('id', row.id)
+      logger('info', `Found work: ${JSON.stringify(work)}`);
+      const rows = await db('working_queue')
+        .where('id', work.id)
         .returning('id')
         .first()
         .update('working', true);
-      logger(
-        'info',
-        `Updated ${id} on work table`,
-        'checkIfNeedsMailing/findWork'
-      );
+      logger('info', `Updated ${rows[0]} on work table`);
 
       return db('carspec')
         .join('cartype', { 'carspec.cartype': 'cartype.id' })
-        .where('carspec.id', id)
+        .where('carspec.id', rows[0])
         .select(
           'carspec.id',
           'cartype',
@@ -87,7 +71,7 @@ const findWork = async () => {
       return;
     }
   } catch (error) {
-    logger('error', error.stack, 'checkIfNeedsMailing/findWork');
+    logger('error', error.stack);
   }
 };
 

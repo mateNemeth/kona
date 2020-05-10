@@ -17,25 +17,17 @@ const getAlerts = async () => {
           }
           return filter;
         });
-        logger(
-          'info',
-          `Returning specific alert filters: ${JSON.stringify(filter)}`,
-          'specAlert/getAlerts'
-        );
+        logger('info', `Returning specific alert filters.`);
         return values;
       });
   } catch (error) {
-    logger('error', error.stack, 'specAlert/getAlerts');
+    logger('error', error.stack);
   }
 };
 
 const getAvgPrices = async (carType) => {
   try {
-    logger(
-      'info',
-      `Getting average/median prices for ${carType} car type.`,
-      'specAlert/getAvgPrices'
-    );
+    logger('info', `Getting average/median prices for cartype: [${carType}].`);
     const vehiclePriceStats = await db('average_prices')
       .select()
       .where('id', carType)
@@ -53,7 +45,7 @@ const getAvgPrices = async (carType) => {
       return { avg: 'Nincs adat', median: 'Nincs adat' };
     }
   } catch (error) {
-    logger('error', error.stack, 'specAlert/getAvgPrices');
+    logger('error', error.stack);
   }
 };
 
@@ -124,7 +116,7 @@ const checkAlert = async (carSpec, alerts) => {
     );
     return toNotify;
   } catch (error) {
-    logger('error', error.stack, 'specAlert/checkAlert');
+    logger('error', error.stack);
   }
 };
 
@@ -134,11 +126,7 @@ const specAlert = async (carSpec) => {
     const users = await checkAlert(carSpec, alerts);
     const { avg, median } = await getAvgPrices(carSpec.cartype);
     if (users && users.length) {
-      logger(
-        'info',
-        `Sending emails to: ${JSON.stringify(users)}`,
-        'specAlert/specAlert'
-      );
+      logger('info', `Sending emails to: ${JSON.stringify(users)}`);
       const link = await db('carlist')
         .select()
         .where('id', carSpec.id)
@@ -157,7 +145,7 @@ const specAlert = async (carSpec) => {
       });
     }
   } catch (error) {
-    logger('error', error.stack, 'specAlert/specAlert');
+    logger('error', error.stack);
   }
 };
 

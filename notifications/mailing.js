@@ -36,9 +36,9 @@ const mailIt = async (typeText, price, link, avg, median, user) => {
       config
     );
 
-    logger('info', `Email sent: ${response.config.data}`, 'mailing/mailIt');
+    logger('info', `Email sent: ${response.config.data}`);
   } catch (error) {
-    logger('error', error.stack, 'mailing/mailIt');
+    logger('error', error.stack);
   }
 };
 

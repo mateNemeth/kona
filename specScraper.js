@@ -7,7 +7,7 @@ const utils = require('./utils');
 
 const findToScrape = async () => {
   try {
-    logger('info', 'Querying un-crawled entries.', 'specScraper/findToScrape');
+    logger('info', 'Querying un-crawled entries.');
     return await db('carlist')
       .where('crawled', false)
       .first()
@@ -19,19 +19,15 @@ const findToScrape = async () => {
             url: row.link,
           };
 
-          logger(
-            'info',
-            `Found new entry: ${JSON.stringify(entry)}`,
-            'specScraper/findToScrape'
-          );
+          logger('info', `Found new entry: ${JSON.stringify(entry)}`);
           return entry;
         }
 
-        logger('info', 'No new entry.', 'specScraper/findToScrape');
+        logger('info', 'No new entry.');
         return;
       });
   } catch (error) {
-    logger('error', error.stack, 'specScraper/findToScrape');
+    logger('error', error.stack);
   }
 };
 
@@ -39,16 +35,12 @@ const scrapeSingle = async () => {
   try {
     const data = await findToScrape();
     if (data) {
-      logger(
-        'info',
-        `Scraping url: ${data.platform}${data.url}`,
-        'specScraper/scrapeSingle'
-      );
+      logger('info', `Scraping url: ${data.platform}${data.url}`);
       const carDetails = await queryUrl(
         `${data.platform}${data.url}`,
         data.id
       ).then(async (resp) => {
-        return await carProcess(resp.data, id);
+        return await carProcess(resp.data, data.id);
       });
       if (!carDetails) {
         const errorCar = await db('carlist')
@@ -56,11 +48,7 @@ const scrapeSingle = async () => {
           .first()
           .then((row) => row.id);
 
-        logger(
-          'info',
-          `Updating db to skip: ${JSON.stringify(errorCar)}.`,
-          'specScraper/scrapeSingle'
-        );
+        logger('info', `Updating db to skip: ${JSON.stringify(errorCar)}.`);
         db('carlist').where('id', errorCar).update('crawled', true);
       } else {
         return carDetails;
@@ -69,13 +57,13 @@ const scrapeSingle = async () => {
       return;
     }
   } catch (error) {
-    logger('error', error.stack, 'specScraper/scrapeSingle');
+    logger('error', error.stack);
   }
 };
 
 const carProcess = async (data, id) => {
   try {
-    logger('info', 'Processing the raw html data.', 'specScraper/carProcess');
+    logger('info', 'Processing the raw html data.');
     const html = await data;
     const numberPattern = /\d+/g;
     const lookFor = (element, keyword) => {
@@ -191,13 +179,13 @@ const carProcess = async (data, id) => {
     ];
 
     if (!vehicle[0].age || !vehicle[0].model || !vehicle[0].make) {
-      logger('warn', 'Missing some data, returning.', 'specScraper/carProcess');
+      logger('warn', 'Missing some data, returning.');
       return;
     } else {
       return vehicle;
     }
   } catch (error) {
-    logger('error', error.stack, 'specScraper/carProcess');
+    logger('error', error.stack);
   }
 };
 
@@ -208,27 +196,23 @@ const queryUrl = async (url, id) => {
     // if a car is no longer listed the response status code is 410
     // i figured there's no need to keep it's link in the db anymore, so i delete it in ifEntryDoesntExist(), then restarting the script
     if (error.response.status === 410 || error.response.status === 404) {
-      logger('info', 'Advert does not exist anymore.', 'specScraper/queryUrl');
+      logger('info', 'Advert does not exist anymore.');
       return await ifEntryDoesntExist(id).then((response) => {
         if (response) {
-          makeItFireInInterval(0);
+          return saveIntoTable();
         }
       });
     }
-    logger('error', error.stack, 'specScraper/queryUrl');
+    logger('error', error.stack);
   }
 };
 
 const ifEntryDoesntExist = async (id) => {
   try {
-    logger(
-      'info',
-      'Deleting unexisting advert.',
-      'specScraper/ifEntryDoesntExist'
-    );
+    logger('info', 'Deleting unexisting advert.');
     return await db('carlist').where('id', id).del();
   } catch (error) {
-    logger('error', error.stack, 'specScraper/ifEntryDoesntExist');
+    logger('error', error.stack);
   }
 };
 
@@ -239,17 +223,13 @@ const saveEntryToWorkingQueue = async (id) => {
       .where('id', id)
       .then((rows) => {
         if (rows.length === 0) {
-          logger(
-            'info',
-            `Saving ${id} into working queue table.`,
-            'specScraper/saveEntryToWorkingQue'
-          );
+          logger('info', `Saving ${id} into working queue table.`);
           return db('working_queue').insert({ id });
         }
         return;
       });
   } catch (error) {
-    logger('error', error.stack, 'specScraper/saveEntryToWorkingQue');
+    logger('error', error.stack);
   }
 };
 
@@ -262,8 +242,7 @@ const saveSpecIntoDb = async (spec, typeId) => {
         if (rows.length === 0) {
           logger(
             'info',
-            `Saving car data into carspec table: ${JSON.stringify(spec)}`,
-            'specScraper/saveSpecIntoDb'
+            `Saving car data into carspec table: ${JSON.stringify(spec)}`
           );
           return db('carspec')
             .returning('id')
@@ -287,7 +266,7 @@ const saveSpecIntoDb = async (spec, typeId) => {
         }
       });
   } catch (error) {
-    logger('error', error.stack, 'specScraper/saveSpecIntoDb');
+    logger('error', error.stack);
   }
 };
 
@@ -304,8 +283,7 @@ const saveTypeIntoDb = async (type) => {
         if (rows.length === 0) {
           logger(
             'info',
-            `New type, saving it into db: ${JSON.stringify(type)}`,
-            'specScraper/saveTypeIntoDb'
+            `New type, saving it into db: ${JSON.stringify(type)}`
           );
           return db('cartype')
             .returning('id')
@@ -320,14 +298,13 @@ const saveTypeIntoDb = async (type) => {
         } else {
           logger(
             'info',
-            `Type already exist, returning it: ${JSON.stringify(rows[0])}`,
-            'specScraper/saveTypeIntoDb'
+            `Type already exist, returning it: ${JSON.stringify(rows[0])}`
           );
           return rows[0].id;
         }
       });
   } catch (error) {
-    logger('error', error.stack, 'specScraper/saveTypeIntoDb');
+    logger('error', error.stack);
   }
 };
 
@@ -335,11 +312,7 @@ const saveIntoTable = async () => {
   try {
     const result = await scrapeSingle().then(async (resp) => {
       if (resp && resp !== 1) {
-        logger(
-          'info',
-          `Saving data to db: ${JSON.stringify(resp)}`,
-          'specScraper/saveIntoTable'
-        );
+        logger('info', `Saving data to db: ${JSON.stringify(resp)}`);
         const spec = resp[1];
         const type = resp[0];
         await saveTypeIntoDb(type).then((typeId) => {
@@ -359,8 +332,7 @@ const saveIntoTable = async () => {
 
         logger(
           'info',
-          `No entry found to scrape, sleeping for ${minutes} minutes.`,
-          'specScraper/saveIntoTable'
+          `No entry found to scrape, sleeping for ${minutes} minutes.`
         );
         await utils.sleep(sleepTime);
         saveIntoTable();
@@ -369,7 +341,7 @@ const saveIntoTable = async () => {
 
     return result;
   } catch (error) {
-    logger('error', error.stack, 'specScraper/saveIntoDb');
+    logger('error', error.stack);
   }
 };
 
