@@ -57,6 +57,11 @@ const scrapeNew = async () => {
       'entryScraper/scrapeNew'
     );
     result.map((item) => {
+      logger(
+        'info',
+        `Logging for bugfix: ${JSON.stringify(item)}`,
+        'entryScraper/scrapeNew'
+      );
       return db('carlist')
         .select()
         .where('platform_id', item.scoutId)
