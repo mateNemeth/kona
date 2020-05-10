@@ -17,10 +17,7 @@ const getAlerts = async () => {
           }
           return filter;
         });
-        logger(
-          'info',
-          `Returning specific alert filters: ${JSON.stringify(values)}`
-        );
+        logger('info', `Returning specific alert filters.`);
         return values;
       });
   } catch (error) {
@@ -30,7 +27,7 @@ const getAlerts = async () => {
 
 const getAvgPrices = async (carType) => {
   try {
-    logger('info', `Getting average/median prices for ${carType} car type.`);
+    logger('info', `Getting average/median prices for cartype: ${carType}.`);
     const vehiclePriceStats = await db('average_prices')
       .select()
       .where('id', carType)
