@@ -56,7 +56,7 @@ const scrapeNew = async () => {
       'Saving entries into CARLIST table.',
       'entryScraper/scrapeNew'
     );
-    result.map((item) => {
+    return result.map((item) => {
       logger(
         'info',
         `Logging for bugfix: ${JSON.stringify(item)}`,
