@@ -41,9 +41,9 @@ const findWork = async () => {
   try {
     const work = await db('working_queue').where('working', false).first();
     if (work) {
-      logger('info', `Found work: ${JSON.stringify(row)}`);
+      logger('info', `Found work: ${JSON.stringify(work)}`);
       const id = db('working_queue')
-        .where('id', row.id)
+        .where('id', work.id)
         .returning('id')
         .first()
         .update('working', true);
