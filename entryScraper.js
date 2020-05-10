@@ -63,7 +63,6 @@ const scrapeNew = async () => {
               crawled: false,
             });
           } else {
-            logger('info', `Entry is already in db: ${JSON.stringify(item)}`);
             return;
           }
         });
