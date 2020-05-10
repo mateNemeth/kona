@@ -3,8 +3,11 @@ const specAlert = require('./specAlert');
 require('dotenv').config();
 const logger = require('../logger/logger');
 
-let minutes = 0.16;
-let the_interval = minutes * 60 * 1000;
+const sleep = (ms) => {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+};
 
 const checkIfNeedsMailing = async () => {
   try {
@@ -15,14 +18,19 @@ const checkIfNeedsMailing = async () => {
         'No work found, sleeping for 10 mins.',
         'checkIfNeedsMailing/checkIfNeedsMailing'
       );
-      minutes = 10;
-      return;
+
+      let minutes = 10;
+      let sleepTime = minutes * 60 * 1000;
+      await sleep(sleepTime);
+      checkIfNeedsMailing();
     } else {
       removeFromQueue(carSpec.id);
       specAlert(carSpec);
 
-      minutes = 0.16;
-      return;
+      let minutes = 0.16;
+      let sleepTime = minutes * 60 * 1000;
+      await sleep(sleepTime);
+      checkIfNeedsMailing();
     }
   } catch (error) {
     logger('error', error.stack, 'checkIfNeedsMailing/checkIfNeedsMailing');
