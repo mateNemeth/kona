@@ -20,11 +20,6 @@ const getData = async () => {
 const processData = async () => {
   try {
     let $ = cheerio.load(await getData());
-    logger(
-      'info',
-      'Collecting entries from main page.',
-      'entryScaper/processData'
-    );
     const data = [];
     $('.cldt-summary-full-item').each((index, element) => {
       let platform = 'https://autoscout24.hu';
@@ -42,6 +37,12 @@ const processData = async () => {
 
       data.push(vehicle);
     });
+
+    logger(
+      'info',
+      `Found entries: ${JSON.stringify(data)}`,
+      'entryScraper/processData'
+    );
     return data;
   } catch (error) {
     logger('error', error.message, 'entryScaper/processData');
@@ -56,7 +57,7 @@ const scrapeNew = async () => {
       'Saving entries into CARLIST table.',
       'entryScraper/scrapeNew'
     );
-    return result.map((item) => {
+    result.map((item) => {
       logger(
         'info',
         `Logging for bugfix: ${JSON.stringify(item)}`,
