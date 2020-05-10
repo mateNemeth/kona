@@ -96,6 +96,4 @@ const findWork = async () => {
   }
 };
 
-setInterval(() => {
-  checkIfNeedsMailing();
-}, the_interval);
+checkIfNeedsMailing();
