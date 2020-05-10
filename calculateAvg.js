@@ -3,7 +3,7 @@ const logger = require('./logger/logger');
 
 const getPricesFromDb = async (typeId) => {
   try {
-    logger('info', `Calculating average prices for ${JSON.stringify(typeId)}`);
+    logger('info', `Calculating average prices for cartype: [${typeId}]`);
     const carType = await db('cartype')
       .select()
       .where('id', typeId)
@@ -42,46 +42,42 @@ const getPricesFromDb = async (typeId) => {
   }
 };
 
-const calculateAverage = async (typeId) => {
+const calculateAverage = async (typeId, prices) => {
   try {
-    return await getPricesFromDb(typeId).then((prices) => {
-      if (prices) {
-        let newAvg = Math.round(
-          prices.reduce((prev, curr) => prev + curr) / prices.length
-        );
+    if (prices) {
+      let newAvg = Math.round(
+        prices.reduce((prev, curr) => prev + curr) / prices.length
+      );
 
-        logger('info', `New average for ${typeId} is ${newAvg},-.`);
-        return newAvg;
-      } else {
-        return;
-      }
-    });
+      logger('info', `New average for [${typeId}] is €${newAvg},-.`);
+      return newAvg;
+    } else {
+      return;
+    }
   } catch (error) {
     logger('error', error.stack);
   }
 };
 
-const calculateMedian = async (typeId) => {
+const calculateMedian = async (typeId, prices) => {
   try {
-    return await getPricesFromDb(typeId).then((prices) => {
-      if (prices) {
-        const sorted = prices.slice().sort((a, b) => a - b);
-        const middle = Math.floor(sorted.length / 2);
+    if (prices) {
+      const sorted = prices.slice().sort((a, b) => a - b);
+      const middle = Math.floor(sorted.length / 2);
 
-        let newMedian;
+      let newMedian;
 
-        if (sorted.length % 2 === 0) {
-          newMedian = Math.round((sorted[middle - 1] + sorted[middle]) / 2);
-        }
-
-        newMedian = Math.round(sorted[middle]);
-
-        logger('info', `New median for ${typeId} is ${newMedian}.`);
-        return newMedian;
+      if (sorted.length % 2 === 0) {
+        newMedian = Math.round((sorted[middle - 1] + sorted[middle]) / 2);
       } else {
-        return;
+        newMedian = Math.round(sorted[middle]);
       }
-    });
+
+      logger('info', `New median for [${typeId}] is €${newMedian},-.`);
+      return newMedian;
+    } else {
+      return;
+    }
   } catch (error) {
     logger('error', error.stack);
   }
@@ -89,8 +85,9 @@ const calculateMedian = async (typeId) => {
 
 const calculateAll = async (typeId) => {
   try {
-    const median = await calculateMedian(typeId);
-    const average = await calculateAverage(typeId);
+    const prices = await getPricesFromDb(typeId);
+    const median = await calculateMedian(typeId, prices);
+    const average = await calculateAverage(typeId, prices);
     if (median && average) {
       // const alertMedianTreshold = median * 0.65
       // const alertAvgTreshold = average * 0.65
@@ -122,5 +119,7 @@ const calculateAll = async (typeId) => {
     logger('error', error.stack);
   }
 };
+
+calculateAll(123);
 
 module.exports = calculateAll;
