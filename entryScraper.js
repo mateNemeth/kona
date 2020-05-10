@@ -1,6 +1,7 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 const db = require('./db');
+const logger = require('./logger/logger');
 
 const url = 'https://www.autoscout24.hu';
 const queryUrl =
@@ -8,58 +9,63 @@ const queryUrl =
 
 const getData = async () => {
   try {
+    logger('info', 'Looking from new entries.', 'entryScaper/queryUrl');
     return await axios.get(`${url}${queryUrl}`);
   } catch (error) {
-    console.log(error);
+    logger('error', error.message, 'entryScaper/queryUrl');
   }
 };
 
-const returnData = async () => {
-  const response = await getData();
-  return response.data;
-};
-
 const processData = async () => {
-  let $ = cheerio.load(await returnData());
-  const data = [];
-  $('.cldt-summary-full-item').each((index, element) => {
-    let platform = 'https://autoscout24.hu';
-    let scoutHtmlId = $(element)
-      .attr('id')
-      .split('-');
-    let scoutId = scoutHtmlId.slice(1, scoutHtmlId.length).join('-');
-    let link = `/ajanlat/${
-      $(element)
-        .find($('a'))
-        .attr('href')
-        .split('/')[2]
-    }`;
+  try {
+    logger(
+      'info',
+      'Collecting entries from main page.',
+      'entryScaper/processData'
+    );
+    let $ = cheerio.load(await getData());
+    const data = [];
+    $('.cldt-summary-full-item').each((index, element) => {
+      let platform = 'https://autoscout24.hu';
+      let scoutHtmlId = $(element).attr('id').split('-');
+      let scoutId = scoutHtmlId.slice(1, scoutHtmlId.length).join('-');
+      let link = `/ajanlat/${
+        $(element).find($('a')).attr('href').split('/')[2]
+      }`;
 
-    let vehicle = {
-      platform,
-      scoutId,
-      link
-    };
+      let vehicle = {
+        platform,
+        scoutId,
+        link,
+      };
 
-    data.push(vehicle);
-  });
-  return data;
+      data.push(vehicle);
+    });
+    return data;
+  } catch (error) {
+    logger('error', error.message, 'entryScaper/processData');
+  }
 };
 
 const scrapeNew = async () => {
-  const result = await processData();
   try {
-    result.map(item => {
+    logger(
+      'info',
+      'Saving entries into CARLIST table.',
+      'entryScraper/scrapeNew'
+    );
+    const result = await processData();
+    result.map((item) => {
       return db('carlist')
         .select()
         .where('platform_id', item.scoutId)
-        .then(rows => {
+        .then((rows) => {
           if (rows.length === 0) {
             return db('carlist').insert({
               platform: item.platform,
               platform_id: item.scoutId,
               link: item.link,
-              crawled: false
+              crawled: false,
             });
           } else {
             return;
@@ -67,7 +73,7 @@ const scrapeNew = async () => {
         });
     });
   } catch (error) {
-    throw new Error(error);
+    logger('error', error.message, 'entryScaper/scrapeNew');
   }
 };
 

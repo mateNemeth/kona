@@ -1,63 +1,93 @@
 const db = require('../db');
 const specAlert = require('./specAlert');
 require('dotenv').config();
+const logger = require('../logger/logger');
+
+let minutes = 0.16;
+let the_interval = minutes * 60 * 1000;
 
 const checkIfNeedsMailing = async () => {
-  const carSpec = await findWork();
-  if (carSpec === 'no work found') {
-    return (minutes = 10);
-  } else {
-    removeFromQueue(carSpec.id);
-    specAlert(carSpec);
+  try {
+    const carSpec = await findWork();
+    if (!carSpec) {
+      logger(
+        'info',
+        'No work found, sleeping for 10 mins.',
+        'checkIfNeedsMailing/checkIfNeedsMailing'
+      );
+      minutes = 10;
+      return;
+    } else {
+      removeFromQueue(carSpec.id);
+      specAlert(carSpec);
 
-    return (minutes = 0.16);
+      minutes = 0.16;
+      return;
+    }
+  } catch (error) {
+    logger('error', error.stack, 'checkIfNeedsMailing/checkIfNeedsMailing');
   }
 };
 
 const removeFromQueue = async (id) => {
-  return await db('working_queue').where('id', id).del();
+  try {
+    logger(
+      'info',
+      `Deleting finished work (id: ${id}) from table.`,
+      'checkIfNeedsMailing/removeFromQueue'
+    );
+    return await db('working_queue').where('id', id).del();
+  } catch (error) {
+    logger('error', error.stack, 'checkIfNeedsMailing/removeFromQueue');
+  }
 };
 
 const findWork = async () => {
-  return await db('working_queue')
-    .where('working', false)
-    .first()
-    .then((row) => {
-      if (row) {
-        return db('working_queue')
-          .where('id', row.id)
-          .returning('id')
-          .update('working', true)
-          .then((resp) => {
-            return db('carspec')
-              .join('cartype', { 'carspec.cartype': 'cartype.id' })
-              .where('carspec.id', resp[0])
-              .select(
-                'carspec.id',
-                'cartype',
-                'ccm',
-                'fuel',
-                'transmission',
-                'price',
-                'kw',
-                'km',
-                'zipcode',
-                'make',
-                'model',
-                'age'
-              )
-              .then((resp) => resp[0]);
-          });
-      } else {
-        return 'no work found';
-      }
-    });
+  try {
+    const work = await db('working_queue').where('working', false).first();
+    if (work) {
+      logger(
+        'info',
+        `Found work: ${JSON.stringify(row)}`,
+        'checkIfNeedsMailing/findWork'
+      );
+      const id = db('working_queue')
+        .where('id', row.id)
+        .returning('id')
+        .first()
+        .update('working', true);
+      logger(
+        'info',
+        `Updated ${id} on work table`,
+        'checkIfNeedsMailing/findWork'
+      );
+
+      return db('carspec')
+        .join('cartype', { 'carspec.cartype': 'cartype.id' })
+        .where('carspec.id', id)
+        .select(
+          'carspec.id',
+          'cartype',
+          'ccm',
+          'fuel',
+          'transmission',
+          'price',
+          'kw',
+          'km',
+          'zipcode',
+          'make',
+          'model',
+          'age'
+        )
+        .then((resp) => resp[0]);
+    } else {
+      return;
+    }
+  } catch (error) {
+    logger('error', error.stack, 'checkIfNeedsMailing/findWork');
+  }
 };
 
-let minutes = 0.16,
-  the_interval = minutes * 60 * 1000;
-
 setInterval(() => {
-  console.log(minutes);
   checkIfNeedsMailing();
 }, the_interval);

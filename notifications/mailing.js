@@ -1,6 +1,7 @@
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
 const axios = require('axios');
+const logger = require('../logger/logger');
 
 const mailIt = async (typeText, price, link, avg, median, user) => {
   const config = {
@@ -35,12 +36,9 @@ const mailIt = async (typeText, price, link, avg, median, user) => {
       config
     );
 
-    console.log(response.config.data);
+    logger('info', `Email sent: ${response.config.data}`, 'mailing/mailIt');
   } catch (error) {
-    let date = new Date().toISOString().slice(0, 10);
-    let time = new Date().toISOString().slice(11, 19);
-    console.error(`${date} ${time}: ${error.message}`);
-    console.error(error);
+    logger('error', error.stack, 'mailing/mailIt');
   }
 };
 

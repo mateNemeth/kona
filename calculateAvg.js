@@ -1,74 +1,149 @@
-const db = require('./db')
+const db = require('./db');
+const logger = require('./logger/logger');
 
 const getPricesFromDb = async (typeId) => {
-    const carType = await db('cartype').select().where('id', typeId).then(row => row[0])
-    const { make, model, age } = carType
-    const older = await db('cartype').select().where('make', make).andWhere('model', model).andWhere('age', age - 1).then(row => row[0] ? row[0].id : null)
-    const newer = await db('cartype').select().where('make', make).andWhere('model', model).andWhere('age', age + 1).then(row => row[0] ? row[0].id : null)
+  try {
+    logger(
+      'info',
+      `Calculating average prices for ${JSON.stringify(typeId)}`,
+      'calculateAvg/getPricesFromDb'
+    );
+    const carType = await db('cartype')
+      .select()
+      .where('id', typeId)
+      .then((row) => row[0]);
+    const { make, model, age } = carType;
+    const older = await db('cartype')
+      .select()
+      .where('make', make)
+      .andWhere('model', model)
+      .andWhere('age', age - 1)
+      .then((row) => (row[0] ? row[0].id : null));
+    const newer = await db('cartype')
+      .select()
+      .where('make', make)
+      .andWhere('model', model)
+      .andWhere('age', age + 1)
+      .then((row) => (row[0] ? row[0].id : null));
 
-    return await db('carspec').select().where('cartype', typeId).orWhere('cartype', older).orWhere('cartype', newer).then(async rows => {
-        if(rows.length >= 5) {            
-            const priceCount = rows.map(item => {
-                return Number(item.price)
-            })
-            return priceCount
+    return await db('carspec')
+      .select()
+      .where('cartype', typeId)
+      .orWhere('cartype', older)
+      .orWhere('cartype', newer)
+      .then(async (rows) => {
+        if (rows.length >= 5) {
+          const priceCount = rows.map((item) => {
+            return Number(item.price);
+          });
+          return priceCount;
         } else {
-            return
+          return;
         }
-    })
-}
+      });
+  } catch (error) {
+    logger('error', error.stack, 'calculateAvg/getPricesFromDb');
+  }
+};
 
 const calculateAverage = async (typeId) => {
-    return await getPricesFromDb(typeId).then(prices => {
-        if(prices) {
-            return Math.round(prices.reduce((prev, curr) => prev + curr) / prices.length)
-        } else {
-            return
-        }
-    })
-}
+  try {
+    return await getPricesFromDb(typeId).then((prices) => {
+      if (prices) {
+        let newAvg = Math.round(
+          prices.reduce((prev, curr) => prev + curr) / prices.length
+        );
+
+        logger(
+          'info'`New average for ${typeId} is ${newAvg},-.`,
+          'calculateAvg/calculateAverage'
+        );
+        return newAvg;
+      } else {
+        return;
+      }
+    });
+  } catch (error) {
+    logger('error', error.stack, 'calculateAvg/calculateAverage');
+  }
+};
 
 const calculateMedian = async (typeId) => {
-    return await getPricesFromDb(typeId).then(prices => {
-        if(prices) {
-            const sorted = prices.slice().sort((a, b) => a- b)
-            const middle = Math.floor(sorted.length / 2)
+  try {
+    return await getPricesFromDb(typeId).then((prices) => {
+      if (prices) {
+        const sorted = prices.slice().sort((a, b) => a - b);
+        const middle = Math.floor(sorted.length / 2);
 
-            if(sorted.length % 2 === 0) {
-                return Math.round((sorted[middle - 1] + sorted[middle]) / 2)
-            }
-            return Math.round(sorted[middle])
-        } else {
-            return
-        }        
-    })
-}
+        let newMedian;
 
-const calculateAll = async (typeId) => {    
-    const median = await calculateMedian(typeId)
-    const average = await calculateAverage(typeId)
+        if (sorted.length % 2 === 0) {
+          newMedian = Math.round((sorted[middle - 1] + sorted[middle]) / 2);
+        }
+
+        newMedian = Math.round(sorted[middle]);
+
+        logger(
+          'info',
+          `New median for ${typeId} is ${newMedian}.`,
+          'calculateAvg/calculateMedian'
+        );
+        return newMedian;
+      } else {
+        return;
+      }
+    });
+  } catch (error) {
+    logger('error', error.stack, 'calculateAvg/calculateMedian');
+  }
+};
+
+const calculateAll = async (typeId) => {
+  try {
+    const median = await calculateMedian(typeId);
+    const average = await calculateAverage(typeId);
     if (median && average) {
-        // const alertMedianTreshold = median * 0.65
-        // const alertAvgTreshold = average * 0.65
-        db('average_prices').select().where('id', typeId).then(rows => {
-            if(rows.length === 0) {
-                return db('average_prices').insert({
-                    id: typeId,
-                    avg: average,
-                    median: median
-                })
-            } else {
-                return db('average_prices').where('id', rows[0].id).update({
-                    id: typeId,
-                    avg: average,
-                    median: median
-                })
-            }
-        })
+      // const alertMedianTreshold = median * 0.65
+      // const alertAvgTreshold = average * 0.65
+      db('average_prices')
+        .select()
+        .where('id', typeId)
+        .then((rows) => {
+          if (rows.length === 0) {
+            logger(
+              'info',
+              'Saving avg & median prices into db.',
+              'calculateAvg/calculateAll'
+            );
+            return db('average_prices').insert({
+              id: typeId,
+              avg: average,
+              median: median,
+            });
+          } else {
+            logger(
+              'info',
+              'Updating avg & median prices into db.',
+              'calculateAvg/calculateAll'
+            );
+            return db('average_prices').where('id', rows[0].id).update({
+              id: typeId,
+              avg: average,
+              median: median,
+            });
+          }
+        });
     } else {
-        return false
+      logger(
+        'info',
+        'Not enough data to calculate prices.',
+        'calculateAvg/calculateAll'
+      );
+      return false;
     }
-}
+  } catch (error) {
+    logger('error', error.stack, 'calculateAvg/calculateAll');
+  }
+};
 
-
-module.exports = calculateAll
+module.exports = calculateAll;

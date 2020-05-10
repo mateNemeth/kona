@@ -1,40 +1,59 @@
 const db = require('../db');
 const mailIt = require('./mailing');
+const logger = require('../logger/logger');
 
 const getAlerts = async () => {
-  return await db('specific_alerts')
-    .select()
-    .then(async (resp) => {
-      const keys = Object.keys(resp[0]);
-      const values = resp.map((row) => {
-        let filter = {};
-        for (let i = 0; i < keys.length; i++) {
-          if (row[keys[i]]) {
-            filter[keys[i]] = row[keys[i]];
+  try {
+    return await db('specific_alerts')
+      .select()
+      .then(async (resp) => {
+        const keys = Object.keys(resp[0]);
+        const values = resp.map((row) => {
+          let filter = {};
+          for (let i = 0; i < keys.length; i++) {
+            if (row[keys[i]]) {
+              filter[keys[i]] = row[keys[i]];
+            }
           }
-        }
-        return filter;
+          return filter;
+        });
+        logger(
+          'info',
+          `Returning specific alert filters: ${JSON.stringify(filter)}`,
+          'specAlert/getAlerts'
+        );
+        return values;
       });
-      return values;
-    });
+  } catch (error) {
+    logger('error', error.stack, 'specAlert/getAlerts');
+  }
 };
 
 const getAvgPrices = async (carType) => {
-  const vehiclePriceStats = await db('average_prices')
-    .select()
-    .where('id', carType)
-    .then((row) => {
-      if (row) {
-        return row[0];
-      } else {
-        return null;
-      }
-    });
+  try {
+    logger(
+      'info',
+      `Getting average/median prices for ${carType} car type.`,
+      'specAlert/getAvgPrices'
+    );
+    const vehiclePriceStats = await db('average_prices')
+      .select()
+      .where('id', carType)
+      .then((row) => {
+        if (row) {
+          return row[0];
+        } else {
+          return null;
+        }
+      });
 
-  if (vehiclePriceStats) {
-    return ({ avg, median } = vehiclePriceStats);
-  } else {
-    return { avg: 'Nincs adat', median: 'Nincs adat' };
+    if (vehiclePriceStats) {
+      return ({ avg, median } = vehiclePriceStats);
+    } else {
+      return { avg: 'Nincs adat', median: 'Nincs adat' };
+    }
+  } catch (error) {
+    logger('error', error.stack, 'specAlert/getAvgPrices');
   }
 };
 
@@ -93,40 +112,52 @@ const checkAlert = async (carSpec, alerts) => {
       return alert;
     }
   });
-  console.log('checkAlert/result: ', result);
-  const toNotify = await Promise.all(
-    result.map(async (item) => {
-      return await db('users')
-        .select('email')
-        .whereRaw(`${item.id}=ANY(specific_alert)`)
-        .then((resp) => resp[0].email);
-    })
-  );
-  return toNotify;
+  try {
+    const toNotify = await Promise.all(
+      result.map(async (item) => {
+        const needToNotify = await db('users')
+          .select('email')
+          .whereRaw(`${item.id}=ANY(specific_alert)`)
+          .then((resp) => resp[0].email);
+        return needToNotify;
+      })
+    );
+    return toNotify;
+  } catch (error) {
+    logger('error', error.stack, 'specAlert/checkAlert');
+  }
 };
 
 const specAlert = async (carSpec) => {
-  const alerts = await getAlerts();
-  const users = await checkAlert(carSpec, alerts);
-  const { avg, median } = await getAvgPrices(carSpec.cartype);
-  console.log('specAlert/users: ', users);
-  if (users && users.length) {
-    const link = await db('carlist')
-      .select()
-      .where('id', carSpec.id)
-      .then((row) => `${row[0].platform}${row[0].link}`);
-    const type = await db('cartype')
-      .select()
-      .where('id', carSpec.cartype)
-      .then((row) => row[0]);
-    const fuelType = await db('carspec')
-      .select()
-      .where('id', carSpec.id)
-      .then((row) => `${row[0].fuel}`);
-    const typeText = `${type.make} ${type.model} - (${type.age}, ${fuelType})`;
-    users.map((user) => {
-      mailIt(typeText, carSpec.price, link, avg, median, user);
-    });
+  try {
+    const alerts = await getAlerts();
+    const users = await checkAlert(carSpec, alerts);
+    const { avg, median } = await getAvgPrices(carSpec.cartype);
+    if (users && users.length) {
+      logger(
+        'info',
+        `Sending emails to: ${JSON.stringify(users)}`,
+        'specAlert/specAlert'
+      );
+      const link = await db('carlist')
+        .select()
+        .where('id', carSpec.id)
+        .then((row) => `${row[0].platform}${row[0].link}`);
+      const type = await db('cartype')
+        .select()
+        .where('id', carSpec.cartype)
+        .then((row) => row[0]);
+      const fuelType = await db('carspec')
+        .select()
+        .where('id', carSpec.id)
+        .then((row) => `${row[0].fuel}`);
+      const typeText = `${type.make} ${type.model} - (${type.age}, ${fuelType})`;
+      users.map((user) => {
+        mailIt(typeText, carSpec.price, link, avg, median, user);
+      });
+    }
+  } catch (error) {
+    logger('error', error.stack, 'specAlert/specAlert');
   }
 };
 
