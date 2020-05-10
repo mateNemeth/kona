@@ -42,16 +42,16 @@ const findWork = async () => {
     const work = await db('working_queue').where('working', false).first();
     if (work) {
       logger('info', `Found work: ${JSON.stringify(work)}`);
-      const id = db('working_queue')
+      const rows = await db('working_queue')
         .where('id', work.id)
         .returning('id')
         .first()
         .update('working', true);
-      logger('info', `Updated ${id} on work table`);
+      logger('info', `Updated ${rows[0]} on work table`);
 
       return db('carspec')
         .join('cartype', { 'carspec.cartype': 'cartype.id' })
-        .where('carspec.id', id)
+        .where('carspec.id', rows[0])
         .select(
           'carspec.id',
           'cartype',
