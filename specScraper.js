@@ -40,7 +40,7 @@ const scrapeSingle = async () => {
         `${data.platform}${data.url}`,
         data.id
       ).then(async (resp) => {
-        return await carProcess(resp.data, id);
+        return await carProcess(resp.data, data.id);
       });
       if (!carDetails) {
         const errorCar = await db('carlist')
