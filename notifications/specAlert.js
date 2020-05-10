@@ -19,7 +19,7 @@ const getAlerts = async () => {
         });
         logger(
           'info',
-          `Returning specific alert filters: ${JSON.stringify(filter)}`
+          `Returning specific alert filters: ${JSON.stringify(values)}`
         );
         return values;
       });
