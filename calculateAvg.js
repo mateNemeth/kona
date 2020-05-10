@@ -120,6 +120,4 @@ const calculateAll = async (typeId) => {
   }
 };
 
-calculateAll(123);
-
 module.exports = calculateAll;
