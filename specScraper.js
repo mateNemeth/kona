@@ -43,6 +43,7 @@ const scrapeSingle = async () => {
       if (!carDetails) {
         logger('info', `Updating db to skip: ${JSON.stringify(data)}.`);
         await db('carlist').where('id', data.id).update('crawled', true);
+        return 'restart';
       } else {
         return carDetails;
       }
@@ -319,6 +320,9 @@ const saveIntoTable = async () => {
         let sleepTime = minutes * 60 * 1000;
 
         await utils.sleep(sleepTime);
+        saveIntoTable();
+      } else if (resp === 'restart') {
+        await utils.sleep(10000);
         saveIntoTable();
       } else {
         let minutes = 5;
