@@ -41,7 +41,7 @@ const scrapeSingle = async () => {
       const carDetails = raw && (await carProcess(raw.data, data.id));
 
       if (!carDetails) {
-        logger('info', `Updating db to skip: ${JSON.stringify(errorCar)}.`);
+        logger('info', `Updating db to skip: ${JSON.stringify(data)}.`);
         await db('carlist').where('id', data.id).update('crawled', true);
       } else {
         return carDetails;
