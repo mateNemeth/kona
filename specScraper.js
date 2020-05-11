@@ -306,8 +306,9 @@ const saveTypeIntoDb = async (type) => {
 const saveIntoTable = async () => {
   try {
     const result = await scrapeSingle().then(async (resp) => {
-      if (resp && resp !== 1) {
+      if (resp && resp !== 'restart') {
         logger('info', `Saving data to db: ${JSON.stringify(resp)}`);
+        console.log(resp);
         const spec = resp[1];
         const type = resp[0];
         await saveTypeIntoDb(type).then((typeId) => {
@@ -320,10 +321,10 @@ const saveIntoTable = async () => {
         let sleepTime = minutes * 60 * 1000;
 
         await utils.sleep(sleepTime);
-        saveIntoTable();
+        return saveIntoTable();
       } else if (resp === 'restart') {
         await utils.sleep(10000);
-        saveIntoTable();
+        return saveIntoTable();
       } else {
         let minutes = 5;
         let sleepTime = minutes * 60 * 1000;
@@ -333,7 +334,7 @@ const saveIntoTable = async () => {
           `No entry found to scrape, sleeping for ${minutes} minutes.`
         );
         await utils.sleep(sleepTime);
-        saveIntoTable();
+        return saveIntoTable();
       }
     });
 
