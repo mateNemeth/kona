@@ -36,20 +36,13 @@ const scrapeSingle = async () => {
     const data = await findToScrape();
     if (data) {
       logger('info', `Scraping url: ${data.platform}${data.url}`);
-      const carDetails = await queryUrl(
-        `${data.platform}${data.url}`,
-        data.id
-      ).then(async (resp) => {
-        return await carProcess(resp.data, data.id);
-      });
-      if (!carDetails) {
-        const errorCar = await db('carlist')
-          .where('crawled', false)
-          .first()
-          .then((row) => row.id);
+      const raw = await queryUrl(`${data.platform}${data.url}`, data.id);
 
+      const carDetails = raw && (await carProcess(raw.data, data.id));
+
+      if (!carDetails) {
         logger('info', `Updating db to skip: ${JSON.stringify(errorCar)}.`);
-        db('carlist').where('id', errorCar).update('crawled', true);
+        await db('carlist').where('id', data.id).update('crawled', true);
       } else {
         return carDetails;
       }
@@ -199,7 +192,8 @@ const queryUrl = async (url, id) => {
       logger('info', 'Advert does not exist anymore.');
       return await ifEntryDoesntExist(id).then((response) => {
         if (response) {
-          return saveIntoTable();
+          saveIntoTable();
+          return;
         }
       });
     }
