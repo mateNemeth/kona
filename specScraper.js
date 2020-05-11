@@ -308,7 +308,6 @@ const saveIntoTable = async () => {
     const result = await scrapeSingle().then(async (resp) => {
       if (resp && resp !== 'restart') {
         logger('info', `Saving data to db: ${JSON.stringify(resp)}`);
-        console.log(resp);
         const spec = resp[1];
         const type = resp[0];
         await saveTypeIntoDb(type).then((typeId) => {
