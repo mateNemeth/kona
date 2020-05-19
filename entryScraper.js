@@ -74,6 +74,7 @@ const scrapeNew = async (minutes) => {
     logger('error', error.message);
   }
 
+
   let sleepTime = newMinutes * 60 * 1000;
   logger('info', `Sleeping for ${newMinutes} minutes.`);
   await utils.sleep(sleepTime);

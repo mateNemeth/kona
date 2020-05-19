@@ -41,8 +41,9 @@ const scrapeSingle = async () => {
       const carDetails = raw && (await carProcess(raw.data, data.id));
 
       if (!carDetails) {
-        logger('info', `Updating db to skip: ${JSON.stringify(errorCar)}.`);
+        logger('info', `Updating db to skip: ${JSON.stringify(data)}.`);
         await db('carlist').where('id', data.id).update('crawled', true);
+        return 'restart';
       } else {
         return carDetails;
       }
@@ -192,7 +193,6 @@ const queryUrl = async (url, id) => {
       logger('info', 'Advert does not exist anymore.');
       return await ifEntryDoesntExist(id).then((response) => {
         if (response) {
-          saveIntoTable();
           return;
         }
       });
@@ -305,7 +305,7 @@ const saveTypeIntoDb = async (type) => {
 const saveIntoTable = async () => {
   try {
     const result = await scrapeSingle().then(async (resp) => {
-      if (resp && resp !== 1) {
+      if (resp && resp !== 'restart') {
         logger('info', `Saving data to db: ${JSON.stringify(resp)}`);
         const spec = resp[1];
         const type = resp[0];
@@ -315,11 +315,14 @@ const saveIntoTable = async () => {
           saveEntryToWorkingQueue(spec.id);
         });
 
-        let minutes = Math.floor(Math.random() * 2) + 0.5;
+        let minutes = Math.random() * 1 + 0.16;
         let sleepTime = minutes * 60 * 1000;
 
         await utils.sleep(sleepTime);
-        saveIntoTable();
+        return saveIntoTable();
+      } else if (resp === 'restart') {
+        await utils.sleep(10000);
+        return saveIntoTable();
       } else {
         let minutes = 5;
         let sleepTime = minutes * 60 * 1000;
@@ -329,7 +332,7 @@ const saveIntoTable = async () => {
           `No entry found to scrape, sleeping for ${minutes} minutes.`
         );
         await utils.sleep(sleepTime);
-        saveIntoTable();
+        return saveIntoTable();
       }
     });
 
