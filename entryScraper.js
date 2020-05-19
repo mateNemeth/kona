@@ -46,7 +46,8 @@ const processData = async () => {
   }
 };
 
-const scrapeNew = async () => {
+const scrapeNew = async (minutes) => {
+  let newMinutes = minutes;
   try {
     const result = await processData();
     result.map((item) => {
@@ -56,6 +57,7 @@ const scrapeNew = async () => {
         .then((rows) => {
           if (rows.length === 0) {
             logger('info', `Saving entry into db: ${JSON.stringify(item)}`);
+            newMinutes = 2.5;
             return db('carlist').insert({
               platform: item.platform,
               platform_id: item.scoutId,
@@ -63,6 +65,7 @@ const scrapeNew = async () => {
               crawled: false,
             });
           } else {
+            newMinutes += 0.1;
             return;
           }
         });
@@ -71,10 +74,11 @@ const scrapeNew = async () => {
     logger('error', error.message);
   }
 
-  let minutes = 2.5;
-  let sleepTime = minutes * 60 * 1000;
+
+  let sleepTime = newMinutes * 60 * 1000;
+  logger('info', `Sleeping for ${newMinutes} minutes.`);
   await utils.sleep(sleepTime);
-  scrapeNew();
+  scrapeNew(newMinutes);
 };
 
-scrapeNew();
+scrapeNew(2.5);
