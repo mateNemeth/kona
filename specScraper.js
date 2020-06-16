@@ -93,26 +93,12 @@ const carProcess = async (data, id) => {
     };
     let fuel = () => {
       if (lookFor($('dt'), 'Üzemanyag').length > 0) {
-        if (
-          lookFor($('dt'), 'Üzemanyag').next().text().trim() ===
-          'Dízel (Particulate Filter)'
-        ) {
+        const fuelType = lookFor($('dt'), 'Üzemanyag').next().text().trim().split('/');
+        const diesel = ['Dízel (Particulate Filter)', 'Dízel'];
+        const petrol = ['Benzin', 'Benzin (Particulate Filter)', 'Super 95 (Particulate Filter)', 'Super 95', '91-es normálbenzin', 'Super E10 Plus 95-ös', 'Super Plus 98-as', 'E10-es 91-es normálbenzin', 'Super Plus E10 98-as'];
+        if (fuelType.some(item => diesel.includes(item.trim()))) {
           return 'Dízel';
-        } else if (
-          lookFor($('dt'), 'Üzemanyag').next().text().trim() ===
-            'Benzin (Particulate Filter)' ||
-          lookFor($('dt'), 'Üzemanyag').next().text().trim() === 'Super 95' ||
-          lookFor($('dt'), 'Üzemanyag').next().text().trim() ===
-            'Super 95 / 91-es normálbenzin' ||
-          lookFor($('dt'), 'Üzemanyag').next().text().trim() ===
-            '91-es normálbenzin' ||
-          lookFor($('dt'), 'Üzemanyag').next().text().trim() ===
-            'Super E10 Plus 95-ös / Super 95 (Particulate Filter)' ||
-          lookFor($('dt'), 'Üzemanyag').next().text().trim() ===
-            '91-es normálbenzin / Super 95 / Super Plus 98-as / E10-es 91-es normálbenzin / Super E10 Plus 95-ös / Super Plus E10 98-as' ||
-          lookFor($('dt'), 'Üzemanyag').next().text().trim() ===
-            'Super E10 Plus 95-ös / 91-es normálbenzin / E10-es 91-es normálbenzin / Super 95 / Super Plus 98-as / Super Plus E10 98-as'
-        ) {
+        } else if (fuelType.some(item => petrol.includes(item.trim()))) {
           return 'Benzin';
         } else {
           return lookFor($('dt'), 'Üzemanyag').next().text().trim();
