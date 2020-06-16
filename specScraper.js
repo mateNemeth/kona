@@ -109,7 +109,9 @@ const carProcess = async (data, id) => {
           lookFor($('dt'), 'Üzemanyag').next().text().trim() ===
             'Super E10 Plus 95-ös / Super 95 (Particulate Filter)' ||
           lookFor($('dt'), 'Üzemanyag').next().text().trim() ===
-            '91-es normálbenzin / Super 95 / Super Plus 98-as / E10-es 91-es normálbenzin / Super E10 Plus 95-ös / Super Plus E10 98-as'
+            '91-es normálbenzin / Super 95 / Super Plus 98-as / E10-es 91-es normálbenzin / Super E10 Plus 95-ös / Super Plus E10 98-as' ||
+          lookFor($('dt'), 'Üzemanyag').next().text().trim() ===
+            'Super E10 Plus 95-ös / 91-es normálbenzin / E10-es 91-es normálbenzin / Super 95 / Super Plus 98-as / Super Plus E10 98-as'
         ) {
           return 'Benzin';
         } else {
