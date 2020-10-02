@@ -42,52 +42,36 @@ const getPricesFromDb = async (typeId) => {
   }
 };
 
-const calculateAverage = async (typeId, prices) => {
-  try {
-    if (prices) {
-      let newAvg = Math.round(
-        prices.reduce((prev, curr) => prev + curr) / prices.length
-      );
+const calculateAverage = (typeId, prices) => {
+  let newAvg = Math.round(
+    prices.reduce((prev, curr) => prev + curr) / prices.length
+  );
 
-      logger('info', `New average for [${typeId}] is €${newAvg},-.`);
-      return newAvg;
-    } else {
-      return;
-    }
-  } catch (error) {
-    logger('error', error.stack);
-  }
+  logger('info', `New average for [${typeId}] is €${newAvg},-.`);
+  return newAvg;
 };
 
-const calculateMedian = async (typeId, prices) => {
-  try {
-    if (prices) {
-      const sorted = prices.slice().sort((a, b) => a - b);
-      const middle = Math.floor(sorted.length / 2);
+const calculateMedian = (typeId, prices) => {
+  const sorted = prices.slice().sort((a, b) => a - b);
+  const middle = Math.floor(sorted.length / 2);
 
-      let newMedian;
+  let newMedian;
 
-      if (sorted.length % 2 === 0) {
-        newMedian = Math.round((sorted[middle - 1] + sorted[middle]) / 2);
-      } else {
-        newMedian = Math.round(sorted[middle]);
-      }
-
-      logger('info', `New median for [${typeId}] is €${newMedian},-.`);
-      return newMedian;
-    } else {
-      return;
-    }
-  } catch (error) {
-    logger('error', error.stack);
+  if (sorted.length % 2 === 0) {
+    newMedian = Math.round((sorted[middle + 1] + sorted[middle]) / 2);
+  } else {
+    newMedian = Math.round(sorted[middle]);
   }
+
+  logger('info', `New median for [${typeId}] is €${newMedian},-.`);
+  return newMedian;
 };
 
 const calculateAll = async (typeId) => {
   try {
     const prices = await getPricesFromDb(typeId);
-    const median = await calculateMedian(typeId, prices);
-    const average = await calculateAverage(typeId, prices);
+    const median = calculateMedian(typeId, prices);
+    const average = calculateAverage(typeId, prices);
     if (median && average) {
       db('average_prices')
         .select()
