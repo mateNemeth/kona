@@ -89,8 +89,6 @@ const calculateAll = async (typeId) => {
     const median = await calculateMedian(typeId, prices);
     const average = await calculateAverage(typeId, prices);
     if (median && average) {
-      // const alertMedianTreshold = median * 0.65
-      // const alertAvgTreshold = average * 0.65
       db('average_prices')
         .select()
         .where('id', typeId)
