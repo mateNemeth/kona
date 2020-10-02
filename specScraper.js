@@ -93,12 +93,26 @@ const carProcess = async (data, id) => {
     };
     let fuel = () => {
       if (lookFor($('dt'), 'Üzemanyag').length > 0) {
-        const fuelType = lookFor($('dt'), 'Üzemanyag').next().text().trim().split('/');
+        const fuelType = lookFor($('dt'), 'Üzemanyag')
+          .next()
+          .text()
+          .trim()
+          .split('/');
         const diesel = ['Dízel (Particulate Filter)', 'Dízel'];
-        const petrol = ['Benzin', 'Benzin (Particulate Filter)', 'Super 95 (Particulate Filter)', 'Super 95', '91-es normálbenzin', 'Super E10 Plus 95-ös', 'Super Plus 98-as', 'E10-es 91-es normálbenzin', 'Super Plus E10 98-as'];
-        if (fuelType.some(item => diesel.includes(item.trim()))) {
+        const petrol = [
+          'Benzin',
+          'Benzin (Particulate Filter)',
+          'Super 95 (Particulate Filter)',
+          'Super 95',
+          '91-es normálbenzin',
+          'Super E10 Plus 95-ös',
+          'Super Plus 98-as',
+          'E10-es 91-es normálbenzin',
+          'Super Plus E10 98-as',
+        ];
+        if (fuelType.some((item) => diesel.includes(item.trim()))) {
           return 'Dízel';
-        } else if (fuelType.some(item => petrol.includes(item.trim()))) {
+        } else if (fuelType.some((item) => petrol.includes(item.trim()))) {
           return 'Benzin';
         } else {
           return lookFor($('dt'), 'Üzemanyag').next().text().trim();
@@ -177,8 +191,6 @@ const queryUrl = async (url, id) => {
   try {
     return await axios.get(url);
   } catch (error) {
-    // if a car is no longer listed the response status code is 410
-    // i figured there's no need to keep it's link in the db anymore, so i delete it in ifEntryDoesntExist(), then restarting the script
     if (error.response.status === 410 || error.response.status === 404) {
       logger('info', 'Advert does not exist anymore.');
       return await ifEntryDoesntExist(id).then((response) => {
