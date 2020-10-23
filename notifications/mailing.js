@@ -1,5 +1,6 @@
 const AWS = require('aws-sdk');
 const path = require('path');
+const logger = require('../logger/logger');
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
 AWS.config.update({
@@ -12,6 +13,7 @@ const mailIt = async (typeText, price, link, avg, median, user) => {
   const params = {
     Destination: {
       ToAddresses: [user],
+      BccAddresses: [process.env.LOGGER_EMAIL],
     },
     Message: {
       /* required */
