@@ -11,7 +11,7 @@ AWS.config.update({
 const mailIt = async (typeText, price, link, avg, median, user) => {
   const params = {
     Destination: {
-      ToAddresses: ['hello@matenemeth.hu'],
+      ToAddresses: [user],
     },
     Message: {
       /* required */
@@ -314,10 +314,10 @@ const mailIt = async (typeText, price, link, avg, median, user) => {
   // Handle promise's fulfilled/rejected states
   sendPromise
     .then(function (data) {
-      console.log(data.MessageId);
+      logger('info', `Email sent: ${user}`);
     })
     .catch(function (err) {
-      console.error(err, err.stack);
+      logger('error', err.stack);
     });
 };
 
