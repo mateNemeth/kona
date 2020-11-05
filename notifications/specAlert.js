@@ -1,5 +1,5 @@
 const db = require('../db');
-const mailIt = require('./mailing');
+const { mailIt } = require('./mailing');
 const logger = require('../logger/logger');
 
 const getAlerts = async () => {

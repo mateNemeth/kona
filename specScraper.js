@@ -4,6 +4,7 @@ const calculateAll = require('./calculateAvg');
 const db = require('./db');
 const logger = require('./logger/logger');
 const utils = require('./utils');
+const { mailError } = require('./notifications/mailing');
 
 const findToScrape = async () => {
   try {
@@ -199,6 +200,7 @@ const queryUrl = async (url, id) => {
         }
       });
     }
+    mailError(error);
     logger('error', error.stack);
   }
 };

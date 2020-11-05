@@ -9,6 +9,40 @@ AWS.config.update({
   region: process.env.AMAZON_REGION,
 });
 
+const mailError = async (error) => {
+  const params = {
+    Destination: {
+      ToAddresses: [process.env.LOGGER_EMAIL],
+    },
+    Message: {
+      Body: {
+        Html: {
+          Charset: 'UTF-8',
+          Data: `${JSON.stringify(error)}`,
+        },
+      },
+      Subject: {
+        Charset: 'UTF-8',
+        Data: 'Error',
+      },
+    },
+    Source: process.env.FROM_EMAIL,
+    ReplyToAddresses: [process.env.REPLY_EMAIL],
+  };
+
+  const sendPromise = new AWS.SES({ apiVersion: '2010-12-01' })
+    .sendEmail(params)
+    .promise();
+
+  sendPromise
+    .then(function (data) {
+      logger('warn', `Error notification sent.`);
+    })
+    .catch(function (err) {
+      logger('error', err.stack);
+    });
+};
+
 const mailIt = async (typeText, price, link, avg, median, user) => {
   const params = {
     Destination: {
@@ -302,9 +336,9 @@ const mailIt = async (typeText, price, link, avg, median, user) => {
         }).format(price)}`,
       },
     },
-    Source: 'no-reply@matenemeth.hu' /* required */,
+    Source: process.env.FROM_EMAIL /* required */,
     ReplyToAddresses: [
-      'no-reply@matenemeth.hu',
+      process.env.REPLY_EMAIL,
       /* more items */
     ],
   };
@@ -323,4 +357,4 @@ const mailIt = async (typeText, price, link, avg, median, user) => {
     });
 };
 
-module.exports = mailIt;
+module.exports = { mailIt, mailError };
