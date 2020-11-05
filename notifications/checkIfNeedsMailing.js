@@ -17,7 +17,7 @@ const checkIfNeedsMailing = async () => {
       removeFromQueue(carSpec.id);
       specAlert(carSpec);
 
-      let minutes = 0.16;
+      let minutes = 0.016;
       sleepTime = minutes * 60 * 1000;
     }
 

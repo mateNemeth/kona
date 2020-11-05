@@ -317,7 +317,7 @@ const saveIntoTable = async () => {
           saveEntryToWorkingQueue(spec.id);
         });
 
-        let minutes = Math.random() * 1 + 0.16;
+        let minutes = Math.random() * 0.5 + 0.16;
         let sleepTime = minutes * 60 * 1000;
 
         await utils.sleep(sleepTime);
