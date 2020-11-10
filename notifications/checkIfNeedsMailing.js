@@ -11,7 +11,7 @@ const checkIfNeedsMailing = async () => {
     if (!carSpec) {
       logger('info', 'No work found, sleeping for 10 mins.');
 
-      let minutes = 10;
+      let minutes = 2;
       sleepTime = minutes * 60 * 1000;
     } else {
       removeFromQueue(carSpec.id);
