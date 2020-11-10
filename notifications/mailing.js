@@ -47,7 +47,7 @@ const mailIt = async (typeText, price, link, avg, median, user) => {
   const params = {
     Destination: {
       ToAddresses: [user],
-      BccAddresses: [process.env.LOGGER_EMAIL],
+      BccAddresses: [process.env.BCC_EMAIL],
     },
     Message: {
       /* required */
