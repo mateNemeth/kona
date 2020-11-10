@@ -9,10 +9,10 @@ const checkIfNeedsMailing = async () => {
     const carSpec = await findWork();
     let sleepTime;
     if (!carSpec) {
-      logger('info', 'No work found, sleeping for 10 mins.');
-
       let minutes = 2;
+
       sleepTime = minutes * 60 * 1000;
+      logger('info', `No work found, sleeping for ${minutes} mins.`);
     } else {
       removeFromQueue(carSpec.id);
       specAlert(carSpec);
